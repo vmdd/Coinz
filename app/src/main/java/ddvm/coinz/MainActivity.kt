@@ -24,6 +24,8 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 
 import kotlinx.android.synthetic.main.activity_main.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener {
 
@@ -45,6 +47,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         mapView = findViewById(R.id.mapboxMapView)
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
+
+        val curDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        val dateFormatted = curDate.format(formatter)
+        val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
+        DownloadFileTask(DownloadCompleteRunner).execute(url)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
