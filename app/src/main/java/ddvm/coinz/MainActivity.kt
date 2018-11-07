@@ -27,11 +27,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener, DownloadCompleteListener {
 
     private val tag = "MainActivity"
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
+    private var result: String? = null
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -52,12 +53,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
         val dateFormatted = curDate.format(formatter)
         val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
-        DownloadFileTask(DownloadCompleteRunner).execute(url)
+        DownloadFileTask(this).execute(url)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+    }
+
+    //runs after geo-JSON map is downloaded
+    override fun downloadComplete(result: String) {
+        this.result = result
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
