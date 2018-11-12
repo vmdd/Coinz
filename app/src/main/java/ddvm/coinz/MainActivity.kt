@@ -7,12 +7,17 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.google.gson.JsonObject
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
 import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Geometry
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -33,6 +38,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private var result: String? = null
+    private val coins = mutableListOf<Coin>()
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -64,6 +70,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //runs after geo-JSON map is downloaded
     override fun downloadComplete(result: String) {
         this.result = result
+        parseJson()
+    }
+
+    fun parseJson(){
+        val fc = FeatureCollection.fromJson(result!!) //null?
+        for (f:Feature in fc.features()!!){        //null?
+            val j:JsonObject = f.properties()!! //null?
+            val id = j.get("id").asString
+            val value = j.get("value").asDouble
+            val currency = j.get("currency").asString
+            val markerSymbol = j.get("marker-symbol").asInt
+            val markerColor = j.get("marker-color").asString
+            val g:Geometry? = f.geometry()
+            val coordinates:List<Double>
+            if(g is Point) {
+                coordinates = g.coordinates()
+                coins.add(Coin(id,value,currency,markerSymbol,markerColor,coordinates))
+            }
+        }
+
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
