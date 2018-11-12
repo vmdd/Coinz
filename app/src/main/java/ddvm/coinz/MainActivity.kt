@@ -19,6 +19,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
@@ -37,7 +38,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val tag = "MainActivity"
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
-    private var result: String? = null
     private val coins = mutableListOf<Coin>()
 
     private lateinit var originLocation: Location
@@ -69,27 +69,34 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //runs after geo-JSON map is downloaded
     override fun downloadComplete(result: String) {
-        this.result = result
-        parseJson()
+        parseJson(result)
+        drawMarkers()
     }
 
-    fun parseJson(){
-        val fc = FeatureCollection.fromJson(result!!) //null?
-        for (f:Feature in fc.features()!!){        //null?
-            val j:JsonObject = f.properties()!! //null?
-            val id = j.get("id").asString
-            val value = j.get("value").asDouble
-            val currency = j.get("currency").asString
-            val markerSymbol = j.get("marker-symbol").asInt
-            val markerColor = j.get("marker-color").asString
-            val g:Geometry? = f.geometry()
-            val coordinates:List<Double>
-            if(g is Point) {
-                coordinates = g.coordinates()
-                coins.add(Coin(id,value,currency,markerSymbol,markerColor,coordinates))
+    private fun parseJson(json: String){
+        val fc = FeatureCollection.fromJson(json)
+        if(fc.features() != null) {
+            for (f: Feature in fc.features()!!) {
+                val j: JsonObject = f.properties()!! //null?
+                val id = j.get("id").asString
+                val value = j.get("value").asDouble
+                val currency = j.get("currency").asString
+                val markerSymbol = j.get("marker-symbol").asInt
+                val markerColor = j.get("marker-color").asString
+                val g: Geometry? = f.geometry()
+                val coordinates: LatLng
+                if (g is Point) {
+                    coordinates = LatLng(g.latitude(),g.longitude())
+                    coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
+                }
             }
         }
+    }
 
+    private fun drawMarkers(){
+        for(coin in coins){
+            map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id))
+        }
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
@@ -103,7 +110,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //make location information avaliable
             enableLocation()
-
+            drawMarkers()
         }
     }
 
