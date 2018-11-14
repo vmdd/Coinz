@@ -1,5 +1,6 @@
 package ddvm.coinz
 
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -7,6 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.gson.JsonObject
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
@@ -39,6 +42,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private val coins = mutableListOf<Coin>()
+    private var mAuth: FirebaseAuth? = null
+    private var mUser: FirebaseUser? = null
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -50,16 +55,25 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        //Mapbox
         Mapbox.getInstance(this, getString(R.string.access_token))
         mapView = findViewById(R.id.mapboxMapView)
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
 
+        //download geojson map
         val curDate = LocalDate.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
         val dateFormatted = curDate.format(formatter)
         val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
         DownloadFileTask(this).execute(url)
+
+        //Firebase
+        mAuth = FirebaseAuth.getInstance()
+        mUser = mAuth?.currentUser
+        if(mUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
