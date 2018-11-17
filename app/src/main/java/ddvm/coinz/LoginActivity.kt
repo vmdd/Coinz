@@ -22,8 +22,8 @@ class LoginActivity : AppCompatActivity(){
         mAuth = FirebaseAuth.getInstance()
 
         email_sign_in_button.setOnClickListener {
-            val email = email.text.toString()
-            val password = password.text.toString()
+            val email = fieldEmail.text.toString()
+            val password = fieldPassword.text.toString()
             signIn(email, password)
         }
         create_new_acc.setOnClickListener {
@@ -32,6 +32,8 @@ class LoginActivity : AppCompatActivity(){
     }
 
     private fun signIn(email: String, password: String) {
+        if(!validateForm(email, password))
+            return
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this){ task ->
@@ -47,6 +49,9 @@ class LoginActivity : AppCompatActivity(){
     }
 
     private fun register(email: String, password: String){
+        if(!validateForm(email, password))
+            return
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this){ task ->
                     if(task.isSuccessful){
@@ -57,6 +62,20 @@ class LoginActivity : AppCompatActivity(){
                     }
 
         }
+    }
+
+    private fun validateForm(email: String, password: String): Boolean{
+        if(email.isEmpty()){
+            fieldEmail.error = "Required"
+            return false
+        }
+
+        if(password.isEmpty()){
+            fieldPassword.error = "Required"
+            return false
+        }
+
+        return true
     }
 
 
