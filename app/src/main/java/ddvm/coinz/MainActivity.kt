@@ -10,6 +10,8 @@ import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.gson.JsonObject
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
@@ -44,6 +46,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coins = mutableListOf<Coin>()
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
+    private var firestore: FirebaseFirestore? = null
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -74,6 +77,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         if(mUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
         }
+
+        firestore = FirebaseFirestore.getInstance()
+        val settings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+        firestore?.firestoreSettings = settings
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
