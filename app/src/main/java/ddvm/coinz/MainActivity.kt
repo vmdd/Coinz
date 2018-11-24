@@ -44,9 +44,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private val coins = mutableListOf<Coin>()
+    private val wallet = mutableListOf<Coin>()
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
+
+    private val collectRange: Int = 25         //range to collect coin in meters
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -96,6 +99,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         drawMarkers()
     }
 
+    //parses the json file, creates Coin objects and adds them to the coins list
     private fun parseJson(json: String){
         val fc = FeatureCollection.fromJson(json)
         if(fc.features() != null) {
@@ -116,6 +120,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //adds markers to the map
     private fun drawMarkers(){
         for(coin in coins){
             map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id))
@@ -194,7 +199,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }else{
             originLocation = location
             setCameraPosition(originLocation)
+            checkCoinsInRange(location)
+
         }
+    }
+
+    //detecting coins in range for collection
+    private fun checkCoinsInRange(location: Location){
+        val latlng = LatLng(location.latitude, location.longitude)  //latlng of user location
+        val coinsIterator = coins.iterator()
+        for(coin in coinsIterator) {
+            if (coin.inRange(latlng, collectRange)) {
+                wallet.add(coin)
+                coinsIterator.remove()
+            }
+        }
+        //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
     }
 
     override fun onConnected() {
