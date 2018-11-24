@@ -24,6 +24,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -43,8 +44,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val tag = "MainActivity"
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
-    private val coins = mutableListOf<Coin>()
-    private val wallet = mutableListOf<Coin>()
+    private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
+    private val wallet = mutableListOf<Coin>()  //list storing collected coins
+    private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
@@ -74,13 +76,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
         DownloadFileTask(this).execute(url)
 
-        //Firebase
+        //Firebase authentication
         mAuth = FirebaseAuth.getInstance()
         mUser = mAuth?.currentUser
+        //if user not logged in go to log in screen
         if(mUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
+        //Cloud firestore
         firestore = FirebaseFirestore.getInstance()
         val settings = FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
@@ -120,13 +124,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
-    //adds markers to the map
-    private fun drawMarkers(){
-        for(coin in coins){
-            map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id))
-        }
-    }
-
     override fun onMapReady(mapboxMap: MapboxMap?) {
         if(mapboxMap == null){
             Log.d(tag, "[onMapReady] mapboxMap is null")
@@ -136,9 +133,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             map?.uiSettings?.isCompassEnabled = true
             map?.uiSettings?.isZoomControlsEnabled = true
 
-            //make location information avaliable
+            //make location information available
             enableLocation()
+            //add markers to the map
             drawMarkers()
+        }
+    }
+
+    //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
+    private fun drawMarkers(){
+        for(coin in coins){
+            val marker: Marker? = map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id))
+            if(marker == null) {
+                Log.d(tag, "[drawMarkers] marker is null")
+            } else {
+                coinsMarkersMap[coin.id] = marker.id
+            }
         }
     }
 
@@ -191,8 +201,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
-
-
     override fun onLocationChanged(location: Location?) {
         if(location == null){
             Log.d(tag, "[onLocationChanged] location is null")
@@ -211,10 +219,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         for(coin in coinsIterator) {
             if (coin.inRange(latlng, collectRange)) {
                 wallet.add(coin)
+                removeMarker(coin)
                 coinsIterator.remove()
             }
         }
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
+    }
+
+    //removes marker representing the coin
+    private fun removeMarker(coin:Coin) {
+        val markerId: Long? = coinsMarkersMap[coin.id]
+        if(markerId == null || map == null) {
+            Log.d(tag, "[removeMarker]: map or marker id is null")
+        } else {
+            for (marker in map!!.markers) {
+                if(markerId == marker.id) {
+                    marker.remove()
+                    break
+                    }
+                }
+            }
     }
 
     override fun onConnected() {
@@ -273,8 +297,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             mapView?.onSaveInstanceState(outState)
         }
     }
-
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
