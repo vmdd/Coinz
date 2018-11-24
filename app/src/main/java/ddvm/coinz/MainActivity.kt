@@ -1,5 +1,6 @@
 package ddvm.coinz
 
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
@@ -42,14 +43,21 @@ import java.time.format.DateTimeFormatter
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener, DownloadCompleteListener {
 
     private val tag = "MainActivity"
+
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
-    private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
-    private val wallet = mutableListOf<Coin>()  //list storing collected coins
-    private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
+
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
+
+    private var downloadDate = ""   //date of last downloaded map, format yyyy/MM/dd
+    private val preferencesFile = "MyPrefsFile"
+    private var mapJson = ""
+
+    private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
+    private val wallet = mutableListOf<Coin>()  //list storing collected coins
+    private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private val collectRange: Int = 25         //range to collect coin in meters
 
@@ -63,18 +71,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        //Mapbox
+        //MapBox
         Mapbox.getInstance(this, getString(R.string.access_token))
         mapView = findViewById(R.id.mapboxMapView)
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
-
-        //download geojson map
-        val curDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        val dateFormatted = curDate.format(formatter)
-        val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
-        DownloadFileTask(this).execute(url)
 
         //Firebase authentication
         mAuth = FirebaseAuth.getInstance()
@@ -101,6 +102,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun downloadComplete(result: String) {
         parseJson(result)
         drawMarkers()
+        mapJson = result    //for storage in shared preferences
     }
 
     //parses the json file, creates Coin objects and adds them to the coins list
@@ -214,10 +216,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //detecting coins in range for collection
     private fun checkCoinsInRange(location: Location){
-        val latlng = LatLng(location.latitude, location.longitude)  //latlng of user location
+        val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
         val coinsIterator = coins.iterator()
         for(coin in coinsIterator) {
-            if (coin.inRange(latlng, collectRange)) {
+            if (coin.inRange(latLng, collectRange)) {
                 wallet.add(coin)
                 removeMarker(coin)
                 coinsIterator.remove()
@@ -264,6 +266,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onStart() {
         super.onStart()
         mapView?.onStart()
+
+        //download geo-json map or read from shared preferences
+        val curDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        val dateFormatted = curDate.format(formatter)   //current date
+        val prefsSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        downloadDate = prefsSettings.getString("lastDownloadDate", "")  //last download date
+        //check if map for a given day already downloaded, else download it
+        if(dateFormatted == downloadDate){
+            mapJson = prefsSettings.getString("mapJson","")
+            parseJson(mapJson)
+        } else{
+            downloadDate = dateFormatted
+            val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
+            DownloadFileTask(this).execute(url)
+        }
+
     }
 
     override fun onResume() {
@@ -279,6 +298,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onStop() {
         super.onStop()
         mapView?.onStop()
+
+        Log.d(tag, "[onStop] Storing lastDownloadDate of $downloadDate")
+        //saving download date and mapJson in shared preferences
+        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        val editor = settings.edit()
+        editor.putString("lastDownloadDate", downloadDate)
+        editor.putString("mapJson", mapJson)
+        editor.apply()
     }
 
     override fun onDestroy() {
