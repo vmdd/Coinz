@@ -4,7 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
@@ -37,10 +40,12 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_main_bar.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener, PermissionsListener, DownloadCompleteListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,
+        PermissionsListener, DownloadCompleteListener, NavigationView.OnNavigationItemSelectedListener {
 
     private val tag = "MainActivity"
 
@@ -92,10 +97,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 .build()
         firestore?.firestoreSettings = settings
 
+        //Navigation drawer
+        val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close)  //toggle to open nav drawer
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        nav_view.setNavigationItemSelectedListener(this)
+
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+    }
+
+    //handling item selections from navigation menu
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_map -> {
+
+            }
+        }
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     //runs after geo-JSON map is downloaded

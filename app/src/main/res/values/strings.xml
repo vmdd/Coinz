@@ -10,4 +10,9 @@
     <string name="prompt_new_acc">Create a new account</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
+
+    <!-- navigation drawer strings -->
+    <string name="nav_map">Map</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>
