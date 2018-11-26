@@ -115,7 +115,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_map -> {
-
+                startActivity(Intent(this, MainActivity::class.java))
+            }
+            R.id.nav_wallet -> {
+                startActivity(Intent(this, WalletActivity::class.java))
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)
