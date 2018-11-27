@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 import kotlinx.android.synthetic.main.activity_login.*
 
+//class for logging in
 class LoginActivity : AppCompatActivity(){
 
     private lateinit var mAuth: FirebaseAuth
