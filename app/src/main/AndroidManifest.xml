@@ -35,8 +35,7 @@
         <activity
             android:name=".WalletActivity"
             android:label="@string/wallet"
-            android:parentActivityName="ddvm.coinz.MainActivity"
-            >
+            android:parentActivityName="ddvm.coinz.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ddvm.coinz.MainActivity" />

@@ -14,6 +14,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.gson.JsonObject
@@ -55,13 +56,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
+    private var firestoreWallet: CollectionReference? = null
 
     private var downloadDate = ""   //date of last downloaded map, format yyyy/MM/dd
     private val preferencesFile = "MyPrefsFile"
     private var mapJson = ""
 
     private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
-    private val wallet = mutableListOf<Coin>()  //list storing collected coins
+    //private val wallet = mutableListOf<Coin>()  //list storing collected coins
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private val collectRange: Int = 25         //range to collect coin in meters
@@ -92,6 +94,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         firestore?.firestoreSettings = settings
+        firestoreWallet = firestore?.collection("users")
+                ?.document(mUser!!.uid)
+                ?.collection("wallet")  //after login mUser shouldn't be null
 
         //Navigation drawer
         val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar,
@@ -243,7 +248,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val coinsIterator = coins.iterator()
         for(coin in coinsIterator) {
             if (coin.inRange(latLng, collectRange)) {
-                wallet.add(coin)
+                firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in firestore
                 removeMarker(coin)
                 coinsIterator.remove()
             }
