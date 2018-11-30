@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_coin.view.*
+import kotlin.math.roundToInt
 
 class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
 
@@ -31,7 +32,7 @@ class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<Co
         fun bindCoin(coin: Coin) {
             this.coin = coin
             view.coin_currency.text = coin.currency
-            view.coin_value.text = coin.value.toString()
+            view.coin_value.text = coin.value.roundToInt().toString()   //rounds the value of the coin for display
         }
     }
 }
