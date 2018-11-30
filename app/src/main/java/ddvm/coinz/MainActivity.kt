@@ -85,10 +85,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //Firebase authentication
         mAuth = FirebaseAuth.getInstance()
         mUser = mAuth?.currentUser
-        //if user not logged in go to log in screen
-        if(mUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
 
         //Cloud firestore
         firestore = FirebaseFirestore.getInstance()

@@ -1,6 +1,7 @@
 package ddvm.coinz
 
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 
 import android.os.Bundle
@@ -18,9 +19,15 @@ class LoginActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
 
         mAuth = FirebaseAuth.getInstance()
+
+        //go to MainActivity if user already logged it
+        if(mAuth.currentUser != null) {
+            goToMain()
+        }
+
+        setContentView(R.layout.activity_login)
 
         email_sign_in_button.setOnClickListener {
             val email = fieldEmail.text.toString()
@@ -40,8 +47,8 @@ class LoginActivity : AppCompatActivity(){
                 .addOnCompleteListener(this){ task ->
             if(task.isSuccessful){
                 //sign in success
-                //go back to Map
-                finish()
+                //go to MainActivity
+                goToMain()
             } else {
                 //sign in unsuccessful
                 Toast.makeText(baseContext, "Authentication failed",Toast.LENGTH_SHORT).show()
@@ -77,6 +84,12 @@ class LoginActivity : AppCompatActivity(){
         }
 
         return true
+    }
+
+    //starts the MainActivity and kills the current Login
+    private fun goToMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
 
