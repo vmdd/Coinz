@@ -128,15 +128,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //runs after geo-JSON map is downloaded
     override fun downloadComplete(result: String) {
-        parseJson(result)
+        getCoinsFromJson(result)
         drawMarkers()
         mapJson = result    //for storage in shared preferences
     }
 
     //parses the json file, creates Coin objects and adds them to the coins list
-    private fun parseJson(json: String){
+    private fun getCoinsFromJson(json: String){
         val fc = FeatureCollection.fromJson(json)
         if(fc.features() != null) {
+            //reading coin attributes from Json and creating a Coin object
             for (f: Feature in fc.features()!!) {
                 val j: JsonObject = f.properties()!! //null?
                 val id = j.get("id").asString
@@ -304,7 +305,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //check if map for a given day already downloaded, else download it
         if(dateFormatted == downloadDate){
             mapJson = prefsSettings.getString("mapJson","")
-            parseJson(mapJson)
+            getCoinsFromJson(mapJson)
         } else{
             downloadDate = dateFormatted
             val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"

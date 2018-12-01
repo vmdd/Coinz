@@ -1,5 +1,6 @@
 package ddvm.coinz
 
+import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -10,6 +11,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 
 import kotlinx.android.synthetic.main.activity_wallet.*
 
@@ -18,10 +21,15 @@ class WalletActivity : AppCompatActivity() {
     private var tag = "WalletActivity"
 
     private var wallet = mutableListOf<Coin>()   //coins collected by the user currently in the wallet
+    private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
     private var firestoreWallet: CollectionReference? = null
+
+    private val preferencesFile = "MyPrefsFile"
+    private var mapJson = ""
+
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
@@ -76,5 +84,23 @@ class WalletActivity : AppCompatActivity() {
                 ?.addOnFailureListener {exception ->
                     Log.w(tag, "[fetchWallet] Error getting documents: ", exception)
                 }
+    }
+
+    //gets exchange rates and stores them in the map
+    private fun getExchangeRates(json: String) {
+        val j: JsonObject = JsonParser().parse(json).asJsonObject
+        val rates = j.get("rates").asJsonObject
+        exchangeRates["SHIL"] = rates.get("SHIL").asDouble
+        exchangeRates["DOLR"] = rates.get("DOLR").asDouble
+        exchangeRates["QUID"] = rates.get("QUID").asDouble
+        exchangeRates["PENY"] = rates.get("PENY").asDouble
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val prefsSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        mapJson = prefsSettings.getString("mapJson","")
+        getExchangeRates(mapJson)
     }
 }
