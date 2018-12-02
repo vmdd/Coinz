@@ -99,6 +99,7 @@ class WalletActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        //read shared preferences file and exchange rates for coins
         val prefsSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         mapJson = prefsSettings.getString("mapJson","")
         getExchangeRates(mapJson)

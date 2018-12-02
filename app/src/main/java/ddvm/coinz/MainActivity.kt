@@ -14,9 +14,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.*
 import com.google.gson.JsonObject
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
@@ -56,15 +54,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
+    private var firestoreUser: DocumentReference? = null
     private var firestoreWallet: CollectionReference? = null
 
     private var downloadDate = ""   //date of last downloaded map, format yyyy/MM/dd
     private val preferencesFile = "MyPrefsFile"
     private var mapJson = ""
+    private var dateFormatted = ""   //current date formated as string
 
     private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
-    //private val wallet = mutableListOf<Coin>()  //list storing collected coins
+    private var collectedCoins: MutableList<*>? = null  //coins already collected, not available for collection
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
+    //private var user: User? = null
 
     private val collectRange: Int = 25         //range to collect coin in meters
 
@@ -78,12 +79,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        //MapBox
-        Mapbox.getInstance(this, getString(R.string.access_token))
-        mapView = findViewById(R.id.mapboxMapView)
-        mapView?.onCreate(savedInstanceState)
-        mapView?.getMapAsync(this)
-
         //Firebase authentication
         mAuth = FirebaseAuth.getInstance()
         mUser = mAuth?.currentUser
@@ -94,9 +89,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         firestore?.firestoreSettings = settings
-        firestoreWallet = firestore?.collection("users")
-                ?.document(mUser!!.uid)
-                ?.collection("wallet")  //after login mUser shouldn't be null
+        firestoreUser = firestore?.collection("users")?.document(mUser!!.uid)  //after login mUser shouldn't be null
+        firestoreWallet = firestoreUser?.collection("wallet")
+
+        //MapBox
+        Mapbox.getInstance(this, getString(R.string.access_token))
+        mapView = findViewById(R.id.mapboxMapView)
+        mapView?.onCreate(savedInstanceState)
+        mapView?.getMapAsync(this)
 
         //Navigation drawer
         val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar,
@@ -128,13 +128,40 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //runs after geo-JSON map is downloaded
     override fun downloadComplete(result: String) {
-        getCoinsFromJson(result)
-        drawMarkers()
         mapJson = result    //for storage in shared preferences
+        downloadUserData()
+    }
+
+    //downloads id of coins that already have been collected
+    private fun downloadUserData() {
+        //load user data from firestore
+        firestoreUser?.get()
+                ?.addOnSuccessListener { document ->
+                    if(document != null && document.exists()) {
+                        collectedCoins = if(document.data?.get("last_map_date") == dateFormatted) {
+                            document.data?.get("collected_coins") as? MutableList<*>
+                        } else {
+                            firestoreUser
+                                    ?.update("last_map_date", dateFormatted,
+                                            "collected_coins", emptyList<String>())
+                            mutableListOf<String>()
+                        }
+                        //generate list of coins available to be collected
+                        getCoinsFromJson(mapJson)
+                    } else {
+                        Log.d(tag, "[onStart] no user document")
+                    }
+                }
+                ?.addOnFailureListener { exception ->
+                    Log.d(tag, "[onStart] get failed with ", exception)
+                }
     }
 
     //parses the json file, creates Coin objects and adds them to the coins list
+    //only adds coins that are still available for collection
     private fun getCoinsFromJson(json: String){
+        if(collectedCoins == null)
+            return
         val fc = FeatureCollection.fromJson(json)
         if(fc.features() != null) {
             //reading coin attributes from Json and creating a Coin object
@@ -149,10 +176,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 val coordinates: LatLng
                 if (g is Point) {
                     coordinates = LatLng(g.latitude(),g.longitude())
-                    coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
+                    //add coin to the list only if it hasn't been collected already
+                    if(!collectedCoins!!.contains(id))  //null checked already
+                        coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
                 }
             }
         }
+
+        drawMarkers()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
@@ -249,7 +280,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val coinsIterator = coins.iterator()
         for(coin in coinsIterator) {
             if (coin.inRange(latLng, collectRange)) {
-                firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in firestore
+                firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in wallet
+                //note which coins collected already, to not display them in the future
+                firestoreUser?.update("collected_coins", FieldValue.arrayUnion(coin.id))
                 removeMarker(coin)
                 coinsIterator.remove()
             }
@@ -296,21 +329,24 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         super.onStart()
         mapView?.onStart()
 
-        //download geo-json map or read from shared preferences
+        //current date
         val curDate = LocalDate.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        val dateFormatted = curDate.format(formatter)   //current date
+        dateFormatted = curDate.format(formatter)   //current date
+
+        //download map or read from shared prefs
         val prefsSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         downloadDate = prefsSettings.getString("lastDownloadDate", "")  //last download date
         //check if map for a given day already downloaded, else download it
         if(dateFormatted == downloadDate){
             mapJson = prefsSettings.getString("mapJson","")
-            getCoinsFromJson(mapJson)
+            downloadUserData()
         } else{
             downloadDate = dateFormatted
             val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
             DownloadFileTask(this).execute(url)
         }
+
 
     }
 
