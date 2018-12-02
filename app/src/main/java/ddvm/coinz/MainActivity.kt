@@ -168,19 +168,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         if(fc.features() != null) {
             //reading coin attributes from Json and creating a Coin object
             for (f: Feature in fc.features()!!) {
-                val j: JsonObject = f.properties()!! //null?
-                val id = j.get("id").asString
-                val value = j.get("value").asDouble
-                val currency = j.get("currency").asString
-                val markerSymbol = j.get("marker-symbol").asInt
-                val markerColor = j.get("marker-color").asString
-                val g: Geometry? = f.geometry()
-                val coordinates: LatLng
-                if (g is Point) {
-                    coordinates = LatLng(g.latitude(),g.longitude())
-                    //add coin to the list only if it hasn't been collected already
-                    if(!collectedCoins!!.contains(id))  //null checked already
-                        coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
+                if(f.properties() != null) {
+                    val j: JsonObject = f.properties()!!
+                    val id = j.get("id").asString
+                    val value = j.get("value").asDouble
+                    val currency = j.get("currency").asString
+                    val markerSymbol = j.get("marker-symbol").asInt
+                    val markerColor = j.get("marker-color").asString
+                    val g: Geometry? = f.geometry()
+                    val coordinates: LatLng
+                    if (g is Point) {
+                        coordinates = LatLng(g.latitude(), g.longitude())
+                        //add coin to the list only if it hasn't been collected already
+                        if (!collectedCoins!!.contains(id))  //null checked already
+                            coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
+                    }
                 }
             }
         }
