@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
-    private lateinit var locationEngine: LocationEngine
+    private var locationEngine: LocationEngine? = null
     private lateinit var locationLayerPlugin: LocationLayerPlugin
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,19 +132,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         downloadUserData()
     }
 
-    //downloads id of coins that already have been collected
+    //downloads id of coins that already have been collected on given day
     private fun downloadUserData() {
         //load user data from firestore
         firestoreUser?.get()
                 ?.addOnSuccessListener { document ->
                     if(document != null && document.exists()) {
+                        //if firestore stores collected coins from the current day, then get them and store in collectedCoins
+                        //else set the day to current and clear the collected_coins array in firestore
                         collectedCoins = if(document.data?.get("last_map_date") == dateFormatted) {
                             document.data?.get("collected_coins") as? MutableList<*>
                         } else {
                             firestoreUser
                                     ?.update("last_map_date", dateFormatted,
                                             "collected_coins", emptyList<String>())
-                            mutableListOf<String>()
+                            mutableListOf<String>() //setting collectedCoins to empty list since all coins will be available on the map
                         }
                         //generate list of coins available to be collected
                         getCoinsFromJson(mapJson)
@@ -228,18 +230,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     private fun initialiseLocationEngine() {
         locationEngine = LocationEngineProvider(this).obtainBestLocationEngineAvailable()
-        locationEngine.apply{
+        locationEngine?.apply{
             interval = 5000 //every 5 seconds
             fastestInterval = 1000 //at most every second
             priority = LocationEnginePriority.HIGH_ACCURACY
             activate()
         }
-        val lastLocation = locationEngine.lastLocation
+        val lastLocation = locationEngine?.lastLocation
         if(lastLocation != null){
             originLocation = lastLocation
             setCameraPosition(lastLocation)
         }else{
-            locationEngine.addLocationEngineListener(this)
+            locationEngine?.addLocationEngineListener(this)
         }
     }
 
@@ -261,6 +263,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 }
             }
         }
+
+        //SIGSEGV
+        lifecycle.addObserver(locationLayerPlugin)
     }
 
     override fun onLocationChanged(location: Location?) {
@@ -307,7 +312,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     override fun onConnected() {
         Log.d(tag, "[onConnected] requesting location updates")
-        locationEngine.requestLocationUpdates()
+        locationEngine?.requestLocationUpdates()
     }
 
     override fun onPermissionResult(granted: Boolean) {
@@ -329,6 +334,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         super.onStart()
         mapView?.onStart()
 
+        //SIGSEGV
+        try {
+            locationEngine?.requestLocationUpdates()
+        } catch(ignored: SecurityException) {}
+        locationEngine?.addLocationEngineListener(this)
+
         //current date
         val curDate = LocalDate.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
@@ -340,7 +351,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //check if map for a given day already downloaded, else download it
         if(dateFormatted == downloadDate){
             mapJson = prefsSettings.getString("mapJson","")
-            downloadUserData()
+            downloadUserData()  //map is already downloaded, so download user data cointaining coins already collected on that day
         } else{
             downloadDate = dateFormatted
             val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
@@ -363,6 +374,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onStop() {
         super.onStop()
         mapView?.onStop()
+
+        //SIGSEGV
+        locationEngine?.removeLocationEngineListener(this)
+        locationEngine?.removeLocationUpdates()
 
         Log.d(tag, "[onStop] Storing lastDownloadDate of $downloadDate")
         //saving download date and mapJson in shared preferences
