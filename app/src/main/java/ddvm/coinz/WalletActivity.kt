@@ -9,6 +9,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.gson.JsonObject
@@ -25,7 +26,8 @@ class WalletActivity : AppCompatActivity() {
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
-    private var firestoreWallet: CollectionReference? = null
+    private var firestoreWallet: CollectionReference? = null    //collection storing user's coins in the wallet
+    private var firestoreUser: DocumentReference? = null        //user document
 
     private val preferencesFile = "MyPrefsFile"
     private var mapJson = ""
@@ -51,6 +53,8 @@ class WalletActivity : AppCompatActivity() {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         firestore?.firestoreSettings = settings
+        firestoreUser = firestore?.collection("users")
+                ?.document(mUser!!.uid)  //after login mUser shouldn't be null
         firestoreWallet = firestore?.collection("users")
                 ?.document(mUser!!.uid)
                 ?.collection("wallet")
@@ -70,6 +74,7 @@ class WalletActivity : AppCompatActivity() {
         fetchWallet()   //get the content of the wallet from cloud firestore
 
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
+        pay_in_button.setOnClickListener { storeCoinsInBank() }
     }
 
     //gets the content of the wallet from firestore and stores it in the wallet list
@@ -98,6 +103,15 @@ class WalletActivity : AppCompatActivity() {
         exchangeRates["PENY"] = rates.get("PENY").asDouble
     }
 
+    private fun convertToGold(coin: Coin): Double {
+        return if(exchangeRates[coin.currency]!=null) {
+            coin.value * exchangeRates[coin.currency]!!
+        } else {
+            Log.d(tag, "[convertToGold()] unknown currency")
+            0.0
+        }
+    }
+
     private fun discardSelectedCoins() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
 
@@ -106,18 +120,48 @@ class WalletActivity : AppCompatActivity() {
             //if the item is selected it is removed
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
-                val coinId = wallet[position].id    //id of the selected coin
-                wallet.removeAt(position)
-                viewAdapter.notifyItemRemoved(position)
-
-                //remove the coin from firestore
-                firestoreWallet?.document(coinId)
-                        ?.delete()
-                        ?.addOnSuccessListener { Log.d(tag, "[discardSelectedCoins] coin deleted") }
-                        ?.addOnFailureListener { e -> Log.d(tag, "[discardSelectedCoins] error deleting document", e) }
+                removeCoin(position)
             }
         }
         viewAdapter.clearItemsStates()  //clears the states since no items are selected now
+    }
+
+    private fun storeCoinsInBank() {
+        val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
+        var gold = 0.0    //for storing gold cained from coin conversion
+        for(i in itemsStates.size()-1 downTo 0) {
+            if(itemsStates.valueAt(i)) {
+                val position = itemsStates.keyAt(i)    //index of the coin
+                gold += convertToGold(wallet[position])
+                removeCoin(position)
+            }
+        }
+        firestore?.runTransaction { transaction ->
+            if(firestoreUser != null) {
+                val snapshot = transaction.get(firestoreUser!!)
+                var currentGold = snapshot.getDouble("gold")
+                if (currentGold == null) {
+                    currentGold = 0.0
+                }     //if the field is null that means the user has 0 gold
+                val newGold = currentGold + gold
+                transaction.update(firestoreUser!!, "gold", newGold)
+            }
+            null
+        }?.addOnSuccessListener { Log.d(tag, "[storeCoinsInBank] transaction succesfull") }
+                ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] transaction failed ", e) }
+        viewAdapter.clearItemsStates()
+    }
+
+    private fun removeCoin(position: Int) {
+        val coinId = wallet[position].id    //id of the selected coin
+        wallet.removeAt(position)
+        viewAdapter.notifyItemRemoved(position)
+
+        //remove the coin from firestore
+        firestoreWallet?.document(coinId)
+                ?.delete()
+                ?.addOnSuccessListener { Log.d(tag, "[discardSelectedCoins] coin deleted") }
+                ?.addOnFailureListener { e -> Log.d(tag, "[discardSelectedCoins] error deleting document", e) }
     }
 
     override fun onStart() {

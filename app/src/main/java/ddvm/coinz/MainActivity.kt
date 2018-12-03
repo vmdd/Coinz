@@ -54,12 +54,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
-    private var firestoreUser: DocumentReference? = null
-    private var firestoreWallet: CollectionReference? = null
+    private var firestoreUser: DocumentReference? = null        //user document
+    private var firestoreWallet: CollectionReference? = null    //collection storing user's coins in the wallet
 
     private var downloadDate = ""   //date of last downloaded map, format yyyy/MM/dd
     private val preferencesFile = "MyPrefsFile"
-    private var mapJson = ""
+    private var mapJson = ""        //downloaded geo-json map
     private var dateFormatted = ""   //current date formated as string
 
     private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map

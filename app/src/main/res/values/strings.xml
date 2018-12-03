@@ -19,4 +19,5 @@
 
     <!-- wallet strings -->
     <string name="discard_coin">Discard</string>
+    <string name="pay_in_bank">Pay in</string>
 </resources>
