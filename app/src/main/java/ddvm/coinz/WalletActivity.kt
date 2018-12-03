@@ -78,7 +78,7 @@ class WalletActivity : AppCompatActivity() {
                     for(document in result) {
                         val coin = document.toObject(Coin::class.java)
                         wallet.add(coin)
-                        viewAdapter.notifyDataSetChanged()  //updates the recycler view with new coin
+                        viewAdapter.notifyItemInserted(wallet.size - 1)  //updates the recycler view with new coin
                     }
                 }
                 ?.addOnFailureListener {exception ->

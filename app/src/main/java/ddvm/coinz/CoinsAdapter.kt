@@ -1,6 +1,7 @@
 package ddvm.coinz
 
 import android.support.v7.widget.RecyclerView
+import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import kotlin.math.roundToInt
 
 class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
 
+    val itemStateArray = SparseBooleanArray()
     //getting size of the list of items to display
     override fun getItemCount() = coins.size
 
@@ -23,8 +25,7 @@ class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<Co
         holder.bindCoin(itemCoin)
     }
 
-
-    class CoinViewHolder(v: View): RecyclerView.ViewHolder(v) {
+    inner class CoinViewHolder(v: View): RecyclerView.ViewHolder(v) {
         private var view:View = v
         private var coin: Coin? = null
 
@@ -33,6 +34,20 @@ class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<Co
             this.coin = coin
             view.coin_currency.text = coin.currency
             view.coin_value.text = coin.value.roundToInt().toString()   //rounds the value of the coin for display
+            view.item_checkBox.isChecked = itemStateArray.get(adapterPosition)
+            view.setOnClickListener { v -> coinItemClicked(v) }
+            view.item_checkBox.setOnClickListener { v -> coinItemClicked(v)}
+
+        }
+
+        private fun coinItemClicked(view: View) {
+            if(!itemStateArray.get(adapterPosition, false)) {
+                view.item_checkBox.isChecked = true
+                itemStateArray.put(adapterPosition, true)
+            } else {
+                view.item_checkBox.isChecked = false
+                itemStateArray.put(adapterPosition, false)
+            }
         }
     }
 }
