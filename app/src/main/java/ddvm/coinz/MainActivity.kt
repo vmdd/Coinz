@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     //downloads id of coins that already have been collected on given day
+    //clears out the list of coins collected previously and resets the daily limit of coins to pay in the bank
     private fun downloadUserData() {
         //load user data from firestore
         firestoreUser?.get()
@@ -140,12 +141,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     if(document != null && document.exists()) {
                         //if firestore stores collected coins from the current day, then get them and store in collectedCoins
                         //else set the day to current and clear the collected_coins array in firestore
-                        collectedCoins = if(document.data?.get("last_map_date") == dateFormatted) {
+                        collectedCoins = if(document.data?.get("last_play_date") == dateFormatted) {
                             document.data?.get("collected_coins") as? MutableList<*>
                         } else {
                             firestoreUser
-                                    ?.update("last_map_date", dateFormatted,
-                                            "collected_coins", emptyList<String>())
+                                    ?.update("last_play_date", dateFormatted,
+                                            "collected_coins", emptyList<String>(), //no coins collected today
+                                            "n_paid_in_coins", 0)     //no coins paid in today yet
                             mutableListOf<String>() //setting collectedCoins to empty list since all coins will be available on the map
                         }
                         //generate list of coins available to be collected

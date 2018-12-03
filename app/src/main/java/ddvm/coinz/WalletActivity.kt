@@ -6,12 +6,10 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.*
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
@@ -21,7 +19,7 @@ class WalletActivity : AppCompatActivity() {
 
     private var tag = "WalletActivity"
 
-    private var wallet = mutableListOf<Coin>()   //coins collected by the user currently in the wallet
+    private var wallet = mutableListOf<Coin>()                  //coins collected by the user currently in the wallet
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
@@ -31,6 +29,11 @@ class WalletActivity : AppCompatActivity() {
 
     private val preferencesFile = "MyPrefsFile"
     private var mapJson = ""
+
+    private var currentGold = 0.0                               //to store user's current gold
+    private var nPaidInCoins = 0                                //to keep track of number of coins paid in today
+
+    private val dailyLimit = 25                                 //daily limit of coins to pay in
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -71,10 +74,34 @@ class WalletActivity : AppCompatActivity() {
             adapter = viewAdapter
         }
 
+        getUserData()   //download user data from firestore
         fetchWallet()   //get the content of the wallet from cloud firestore
 
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
-        pay_in_button.setOnClickListener { storeCoinsInBank() }
+        pay_in_button.setOnClickListener {
+            if(checkPayInLimit())
+                storeCoinsInBank()
+            else {
+                val toast = Toast.makeText(this,
+                        "You can only pay in ${dailyLimit - nPaidInCoins} coin(s) more",
+                        Toast.LENGTH_SHORT)
+                toast.show()
+            }
+        }
+    }
+
+    //get user's current gold and number of coins paid in today
+    private fun getUserData() {
+        firestoreUser?.get()
+                ?.addOnSuccessListener { document ->
+                    if(document.getDouble("gold")!=null) {
+                        currentGold = document.getDouble("gold")!!
+                    }
+                    if(document.getDouble("n_paid_in_coins")!=null){
+                        nPaidInCoins = document.getDouble("n_paid_in_coins")!!.toInt()
+                    }
+                }
+                ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] get failed with ", e) }
     }
 
     //gets the content of the wallet from firestore and stores it in the wallet list
@@ -126,30 +153,40 @@ class WalletActivity : AppCompatActivity() {
         viewAdapter.clearItemsStates()  //clears the states since no items are selected now
     }
 
+    //deletes the item from the view and firestore, and increases amount of user gold accordingly
     private fun storeCoinsInBank() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
-        var gold = 0.0    //for storing gold cained from coin conversion
+        var gold = 0.0    //for storing gold gained from coin conversion
+        var nStoredCoins = 0    //counter for stored coins
         for(i in itemsStates.size()-1 downTo 0) {
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
                 gold += convertToGold(wallet[position])
                 removeCoin(position)
+                nStoredCoins += 1
             }
         }
-        firestore?.runTransaction { transaction ->
-            if(firestoreUser != null) {
-                val snapshot = transaction.get(firestoreUser!!)
-                var currentGold = snapshot.getDouble("gold")
-                if (currentGold == null) {
-                    currentGold = 0.0
-                }     //if the field is null that means the user has 0 gold
-                val newGold = currentGold + gold
-                transaction.update(firestoreUser!!, "gold", newGold)
-            }
-            null
-        }?.addOnSuccessListener { Log.d(tag, "[storeCoinsInBank] transaction succesfull") }
-                ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] transaction failed ", e) }
+        currentGold += gold             //amount of user's gold after converting coins to gold
+        nPaidInCoins += nStoredCoins    //updating number of coins paid in today
+
+        firestoreUser?.update("gold", currentGold,
+                "n_paid_in_coins", nPaidInCoins)
+                ?.addOnSuccessListener { Log.d(tag, "[storeCoinsInBank] document updated successfully") }
+                ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] error updating document", e) }
+
         viewAdapter.clearItemsStates()
+    }
+
+    //check if the limit allows the user to pay in selected coins
+    private fun checkPayInLimit(): Boolean {
+        val itemsStates = viewAdapter.getItemsStates()
+        var nCoinsToPayIn = 0   //counter for number of coins selected
+        for(i in 0 until itemsStates.size()){
+            if(itemsStates.valueAt(i))
+                nCoinsToPayIn++
+        }
+
+        return (dailyLimit - nPaidInCoins - nCoinsToPayIn >= 0)
     }
 
     private fun removeCoin(position: Int) {
