@@ -10,8 +10,11 @@ import kotlin.math.roundToInt
 
 class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
 
-    val itemStateArray = SparseBooleanArray()
-    //getting size of the list of items to display
+    private val itemStateArray = SparseBooleanArray()   //array storing position of selected coins
+
+    fun getItemsStates() = itemStateArray
+    fun clearItemsStates() { itemStateArray.clear() }
+
     override fun getItemCount() = coins.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoinViewHolder {
@@ -34,12 +37,13 @@ class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<Co
             this.coin = coin
             view.coin_currency.text = coin.currency
             view.coin_value.text = coin.value.roundToInt().toString()   //rounds the value of the coin for display
-            view.item_checkBox.isChecked = itemStateArray.get(adapterPosition)
+            view.item_checkBox.isChecked = itemStateArray.get(adapterPosition)  //set the textbox to the correct state
             view.setOnClickListener { v -> coinItemClicked(v) }
             view.item_checkBox.setOnClickListener { v -> coinItemClicked(v)}
 
         }
 
+        //changes the checkbox state and stores it in the itemStateArray
         private fun coinItemClicked(view: View) {
             if(!itemStateArray.get(adapterPosition, false)) {
                 view.item_checkBox.isChecked = true

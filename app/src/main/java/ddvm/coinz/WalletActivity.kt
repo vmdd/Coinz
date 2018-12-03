@@ -68,6 +68,8 @@ class WalletActivity : AppCompatActivity() {
         }
 
         fetchWallet()   //get the content of the wallet from cloud firestore
+
+        discard_coin_button.setOnClickListener { discardSelectedCoins() }
     }
 
     //gets the content of the wallet from firestore and stores it in the wallet list
@@ -94,6 +96,28 @@ class WalletActivity : AppCompatActivity() {
         exchangeRates["DOLR"] = rates.get("DOLR").asDouble
         exchangeRates["QUID"] = rates.get("QUID").asDouble
         exchangeRates["PENY"] = rates.get("PENY").asDouble
+    }
+
+    private fun discardSelectedCoins() {
+        val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
+
+        //iterates from the end of the array, to remove items with higher index first
+        for(i in itemsStates.size()-1 downTo 0) {
+            //if the item is selected it is removed
+            if(itemsStates.valueAt(i)) {
+                val position = itemsStates.keyAt(i)    //index of the coin
+                val coinId = wallet[position].id    //id of the selected coin
+                wallet.removeAt(position)
+                viewAdapter.notifyItemRemoved(position)
+
+                //remove the coin from firestore
+                firestoreWallet?.document(coinId)
+                        ?.delete()
+                        ?.addOnSuccessListener { Log.d(tag, "[discardSelectedCoins] coin deleted") }
+                        ?.addOnFailureListener { e -> Log.d(tag, "[discardSelectedCoins] error deleting document", e) }
+            }
+        }
+        viewAdapter.clearItemsStates()  //clears the states since no items are selected now
     }
 
     override fun onStart() {
