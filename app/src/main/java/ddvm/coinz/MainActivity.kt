@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     private fun saveMapToSharedPrefs() {
-        Log.d(tag, "[onStop] Storing lastDownloadDate of $downloadDate")
+        Log.d(tag, "[saveMapToSharedPrefs] Storing lastDownloadDate of $downloadDate")
         //saving download date and mapJson in shared preferences
         val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         val editor = settings.edit()
@@ -229,6 +229,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 coinsMarkersMap[coin.id] = marker.id
             }
         }
+        Log.d(tag, "[drawMarkers] number of markers on the map ${map?.markers?.size}")
     }
 
     private fun enableLocation() {

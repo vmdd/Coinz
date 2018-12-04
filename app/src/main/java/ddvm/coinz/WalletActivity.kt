@@ -197,8 +197,8 @@ class WalletActivity : AppCompatActivity() {
         //remove the coin from firestore
         firestoreWallet?.document(coinId)
                 ?.delete()
-                ?.addOnSuccessListener { Log.d(tag, "[discardSelectedCoins] coin deleted") }
-                ?.addOnFailureListener { e -> Log.d(tag, "[discardSelectedCoins] error deleting document", e) }
+                ?.addOnSuccessListener { Log.d(tag, "[removeCoin] coin removed from database") }
+                ?.addOnFailureListener { e -> Log.d(tag, "[removeCoin] error deleting coin document", e) }
     }
 
     override fun onStart() {
