@@ -4,11 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WalletActivity">
-
+    tools:context=".SendCoinsActivity">
 
     <LinearLayout
-        android:id="@+id/wallet_buttons"
+        android:id="@+id/transfer_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -17,35 +16,33 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        style="?android:attr/buttonBarStyle">
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/recipient"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="@string/prompt_recipient" />
 
         <Button
-            android:id="@+id/discard_coin_button"
+            android:id="@+id/transfer_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/discard_coin" />
-
-        <Button
-            android:id="@+id/pay_in_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/pay_in_bank" />
+            android:text="@string/send_coins" />
     </LinearLayout>
 
-    <!-- recyclerView containing displaying coins currently in the wallet -->
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/coins_recycler_view"
+        android:id="@+id/coins_transfer_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/wallet_buttons"
+        app:layout_constraintBottom_toTopOf="@+id/transfer_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"

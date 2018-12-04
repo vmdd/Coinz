@@ -39,4 +39,8 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <!-- send coins strings -->
+    <string name="prompt_recipient">Recipient\'s username</string>
+    <string name="send_coins">Send Coins</string>
 </resources>
