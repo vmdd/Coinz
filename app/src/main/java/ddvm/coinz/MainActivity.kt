@@ -118,8 +118,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_map -> {
                 startActivity(Intent(this, MainActivity::class.java))
             }
+            //go to wallet activity
             R.id.nav_wallet -> {
                 startActivity(Intent(this, WalletActivity::class.java))
+            }
+            //sign the user out
+            R.id.nav_sign_out -> {
+                FirebaseAuth.getInstance().signOut()    //sign out the user from the current session
+                finish()
+                startActivity(Intent(this,LoginActivity::class.java))   //go to login screen
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)

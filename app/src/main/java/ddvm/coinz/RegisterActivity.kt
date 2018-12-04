@@ -154,8 +154,8 @@ class RegisterActivity : AppCompatActivity(){
 
     //starts the MainActivity, finishes login and register activities
     private fun goToMain() {
+        finishAffinity()    //finish register and login activities
         startActivity(Intent(this, MainActivity::class.java))
-        finishAffinity()    //also finishes the parent activity - LoginActivity
     }
 
 

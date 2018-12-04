@@ -26,6 +26,7 @@
     <string name="wallet">Wallet</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="sign_out">Sign out</string>
 
     <!-- wallet strings -->
     <string name="discard_coin">Discard</string>
