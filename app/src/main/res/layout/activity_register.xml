@@ -7,25 +7,25 @@
     android:gravity="center_horizontal"
     tools:context=".LoginActivity">
 
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/textInputLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </android.support.design.widget.TextInputLayout>
-
     <Button
-        android:id="@+id/email_sign_in_button"
+        android:id="@+id/create_new_acc"
         android:layout_width="352dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="@string/action_sign_in"
+        android:text="@string/prompt_new_acc"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/go_to_sign_in"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/go_to_register"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/go_to_sign_in"
+        android:layout_width="352dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="@string/already_have_acc"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -37,7 +37,7 @@
         android:ems="10"
         android:hint="@string/prompt_password"
         android:inputType="textPassword"
-        app:layout_constraintBottom_toTopOf="@+id/email_sign_in_button"
+        app:layout_constraintBottom_toTopOf="@+id/create_new_acc"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
@@ -55,16 +55,18 @@
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/go_to_register"
-        android:layout_width="352dp"
+    <EditText
+        android:id="@+id/fieldUserName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:text="@string/prompt_new_acc"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="@string/prompt_username"
+        app:layout_constraintBottom_toTopOf="@+id/fieldEmail"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
 

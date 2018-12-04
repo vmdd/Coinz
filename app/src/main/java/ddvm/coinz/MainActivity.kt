@@ -130,6 +130,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun downloadComplete(result: String) {
         mapJson = result    //for storage in shared preferences
         downloadUserData()
+        saveMapToSharedPrefs()
+    }
+
+    private fun saveMapToSharedPrefs() {
+        Log.d(tag, "[onStop] Storing lastDownloadDate of $downloadDate")
+        //saving download date and mapJson in shared preferences
+        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        val editor = settings.edit()
+        editor.putString("lastDownloadDate", downloadDate)
+        editor.putString("mapJson", mapJson)
+        editor.apply()
     }
 
     //downloads id of coins that already have been collected on given day
@@ -382,14 +393,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //SIGSEGV
         locationEngine?.removeLocationEngineListener(this)
         locationEngine?.removeLocationUpdates()
-
-        Log.d(tag, "[onStop] Storing lastDownloadDate of $downloadDate")
-        //saving download date and mapJson in shared preferences
-        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
-        val editor = settings.edit()
-        editor.putString("lastDownloadDate", downloadDate)
-        editor.putString("mapJson", mapJson)
-        editor.apply()
     }
 
     override fun onDestroy() {

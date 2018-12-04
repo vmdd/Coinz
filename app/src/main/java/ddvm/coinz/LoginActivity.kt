@@ -5,8 +5,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 
 import android.os.Bundle
-
-import android.widget.Toast
+import android.util.Log
 
 import com.google.firebase.auth.FirebaseAuth
 
@@ -15,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 //class for logging in
 class LoginActivity : AppCompatActivity(){
 
+    private val tag = "LoginActivity"
     private lateinit var mAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,8 +34,8 @@ class LoginActivity : AppCompatActivity(){
             val password = fieldPassword.text.toString()
             signIn(email, password)
         }
-        create_new_acc.setOnClickListener {
-
+        go_to_register.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 
@@ -51,35 +51,21 @@ class LoginActivity : AppCompatActivity(){
                 goToMain()
             } else {
                 //sign in unsuccessful
-                Toast.makeText(baseContext, "Authentication failed",Toast.LENGTH_SHORT).show()
+                Log.d(tag,"[signIn] login failed ", task.exception)
+                fieldEmail.error  = getString(R.string.invalid_email_pass)
+                fieldPassword.error = getString(R.string.invalid_email_pass)
             }
         }
     }
 
-    private fun register(email: String, password: String){
-        if(!validateForm(email, password))
-            return
-
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this){ task ->
-                    if(task.isSuccessful){
-                        //sign up successful
-                        finish()
-                    } else {
-                        Toast.makeText(baseContext, "Authentication failed",Toast.LENGTH_SHORT).show()
-                    }
-
-        }
-    }
-
     private fun validateForm(email: String, password: String): Boolean{
-        if(email.isEmpty()){
-            fieldEmail.error = "Required"
+        if(email.isBlank()){
+            fieldEmail.error = getString(R.string.required)
             return false
         }
 
-        if(password.isEmpty()){
-            fieldPassword.error = "Required"
+        if(password.isBlank()){
+            fieldPassword.error = getString(R.string.required)
             return false
         }
 
