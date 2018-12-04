@@ -6,6 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".WalletActivity">
 
+    <LinearLayout
+        android:id="@+id/send_coins_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/wallet_buttons"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/field_recipient"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="@string/prompt_recipient" />
+
+        <Button
+            android:id="@+id/send_coins_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/send_coins" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/wallet_buttons"
@@ -45,7 +73,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/wallet_buttons"
+        app:layout_constraintBottom_toTopOf="@+id/send_coins_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"

@@ -8,9 +8,6 @@
             android:id="@+id/nav_wallet"
             android:title="@string/wallet" />
         <item
-            android:id="@+id/nav_send_coins"
-            android:title="@string/send_coins" />
-        <item
             android:id="@+id/nav_sign_out"
             android:title="@string/sign_out" />
     </group>

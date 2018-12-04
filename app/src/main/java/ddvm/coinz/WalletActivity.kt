@@ -30,6 +30,7 @@ class WalletActivity : AppCompatActivity() {
     private val preferencesFile = "MyPrefsFile"
     private var mapJson = ""
 
+    private var username = ""
     private var currentGold = 0.0                               //to store user's current gold
     private var nPaidInCoins = 0                                //to keep track of number of coins paid in today
 
@@ -88,6 +89,15 @@ class WalletActivity : AppCompatActivity() {
                 toast.show()
             }
         }
+        send_coins_button.setOnClickListener {
+            if(nPaidInCoins<25) {
+                Toast.makeText(this, "You can only send coins after storing 25 coins in the bank on a given day",
+                        Toast.LENGTH_SHORT)
+                        .show()
+            } else {
+                checkRecipientExists()
+            }
+        }
     }
 
     //get user's current gold and number of coins paid in today
@@ -99,6 +109,10 @@ class WalletActivity : AppCompatActivity() {
                     }
                     if(document.getDouble("n_paid_in_coins")!=null){
                         nPaidInCoins = document.getDouble("n_paid_in_coins")!!.toInt()
+                    }
+                    if(document.getString("username")!=null) {
+                        username = document.getString("username")!!
+
                     }
                 }
                 ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] get failed with ", e) }
@@ -158,6 +172,7 @@ class WalletActivity : AppCompatActivity() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
         var gold = 0.0    //for storing gold gained from coin conversion
         var nStoredCoins = 0    //counter for stored coins
+        //iterates from the end of the array, to remove items with higher index first
         for(i in itemsStates.size()-1 downTo 0) {
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
@@ -199,6 +214,45 @@ class WalletActivity : AppCompatActivity() {
                 ?.delete()
                 ?.addOnSuccessListener { Log.d(tag, "[removeCoin] coin removed from database") }
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoin] error deleting coin document", e) }
+    }
+
+    private fun checkRecipientExists() {
+        val recipientUsername = field_recipient.text.toString().toLowerCase()
+        firestore?.collection("users")
+                ?.whereEqualTo("lowercase_username", recipientUsername)        //querying for documents with same username
+                ?.get()
+                ?.addOnSuccessListener { documents ->
+                    //if documents is empty then recipient with given username does not exist
+                    if(documents.isEmpty) {
+                        field_recipient.error = "Recipient does not exist"
+                        Log.d(tag, "[checkRecipientExists] $recipientUsername")
+                    } else {
+                        for(document in documents) {
+                            sendCoins(document.id)                     //recipient exists, send coins and pass recipients uid
+                        }
+                    }
+                }
+                ?.addOnFailureListener { e ->
+                    Log.d(tag, "[checkRecipientExists] error getting documents ", e)
+                }
+    }
+
+    private fun sendCoins(recipientUid: String) {
+        val firestoreRecipient = firestore?.collection("users/$recipientUid/received_coins")
+
+        val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
+
+        //iterates from the end of the array, to remove items with higher index first
+        for(i in itemsStates.size()-1 downTo 0) {
+            //if the item is selected it is removed
+            if(itemsStates.valueAt(i)) {
+                val position = itemsStates.keyAt(i)    //index of the coin
+                val coin = wallet[position]
+                //store coin in recipient's collection, set document id as coin id and sender's username
+                firestoreRecipient?.document(coin.id + username)?.set(coin)
+                removeCoin(position)
+            }
+        }
     }
 
     override fun onStart() {
