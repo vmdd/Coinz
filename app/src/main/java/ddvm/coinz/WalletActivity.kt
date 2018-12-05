@@ -95,7 +95,7 @@ class WalletActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT)
                         .show()
             } else {
-                checkRecipientExists()
+                checkRecipientValid()
             }
         }
     }
@@ -216,8 +216,15 @@ class WalletActivity : AppCompatActivity() {
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoin] error deleting coin document", e) }
     }
 
-    private fun checkRecipientExists() {
+    private fun checkRecipientValid() {
+
         val recipientUsername = field_recipient.text.toString().toLowerCase()
+        //check if the user tries to send coins to themselves
+        if(username.toLowerCase() == recipientUsername) {
+            field_recipient.error = "You can't send coins to yourself!"
+            return
+        }
+        //check if user with given username exists
         firestore?.collection("users")
                 ?.whereEqualTo("lowercase_username", recipientUsername)        //querying for documents with same username
                 ?.get()
