@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_coin.view.*
 import kotlin.math.roundToInt
 
-class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
+open class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
 
     private val itemStateArray = SparseBooleanArray()   //array storing position of selected coins
 
@@ -29,8 +29,9 @@ class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<Co
     }
 
     inner class CoinViewHolder(v: View): RecyclerView.ViewHolder(v) {
-        private var view:View = v
+        var view: View = v
         private var coin: Coin? = null
+
 
         //binding coin to the CoinViewHolder to display the item
         fun bindCoin(coin: Coin) {

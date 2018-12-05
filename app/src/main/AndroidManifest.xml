@@ -39,6 +39,10 @@
             android:name=".WalletActivity"
             android:label="@string/wallet"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ReceivedCoinsActivity"
+            android:label="@string/received_coins"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

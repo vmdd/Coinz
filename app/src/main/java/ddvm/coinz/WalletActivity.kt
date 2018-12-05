@@ -253,6 +253,7 @@ class WalletActivity : AppCompatActivity() {
                 removeCoin(position)
             }
         }
+        viewAdapter.clearItemsStates()
     }
 
     override fun onStart() {

@@ -36,11 +36,11 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
-
-    <!-- send coins strings -->
     <string name="prompt_recipient">Recipient\'s username</string>
     <string name="send_coins">Send Coins</string>
+
+    <!-- received coins strings -->
+    <string name="received_coins">Received coins</string>
+
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
 </resources>

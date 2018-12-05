@@ -122,6 +122,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_wallet -> {
                 startActivity(Intent(this, WalletActivity::class.java))
             }
+            R.id.nav_received_coins -> {
+                startActivity(Intent(this, ReceivedCoinsActivity::class.java))
+            }
             //sign the user out
             R.id.nav_sign_out -> {
                 FirebaseAuth.getInstance().signOut()    //sign out the user from the current session
