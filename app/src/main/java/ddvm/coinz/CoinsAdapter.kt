@@ -28,10 +28,10 @@ open class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapt
         holder.bindCoin(itemCoin)
     }
 
-    inner class CoinViewHolder(v: View): RecyclerView.ViewHolder(v) {
-        var view: View = v
+    inner class CoinViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
         private var coin: Coin? = null
 
+        fun getView() = view
 
         //binding coin to the CoinViewHolder to display the item
         fun bindCoin(coin: Coin) {

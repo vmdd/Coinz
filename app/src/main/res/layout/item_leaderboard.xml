@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- layout for each coin received from another user -->
+<!-- layout for leaderboard entry -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
@@ -8,32 +8,25 @@
     android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingEnd="@dimen/activity_horizontal_margin">   <!-- each item has only enough space to display information -->
 
-    <!-- text view for coin value -->
+    <!-- text view for position of the user on the leaderboard -->
     <TextView
-        android:id="@+id/coin_value"
+        android:id="@+id/position"
         android:layout_width="1dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_weight="0.5" />
 
-    <!-- text view for coin currency -->
-
+    <!-- text view for user's username -->
     <TextView
-        android:id="@+id/coin_currency"
+        android:id="@+id/username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_weight="2" />
 
-    <!-- text view for sender of the coin -->
+    <!-- amount of gold the user has -->
     <TextView
-        android:id="@+id/sender"
+        android:id="@+id/user_gold"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
-
-    <!-- checkbox for showing coin selection -->
-    <CheckBox
-        android:id="@+id/item_checkBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_weight="2" />
 
 </LinearLayout>

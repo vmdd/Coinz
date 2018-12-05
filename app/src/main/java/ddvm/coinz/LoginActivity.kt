@@ -74,8 +74,8 @@ class LoginActivity : AppCompatActivity(){
 
     //starts the MainActivity and kills the current Login
     private fun goToMain() {
-        finish()
         startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
 

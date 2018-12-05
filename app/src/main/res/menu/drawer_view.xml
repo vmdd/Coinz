@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_map"
-            android:title="@string/nav_map" />
-        <item
             android:id="@+id/nav_wallet"
             android:title="@string/wallet" />
         <item
             android:id="@+id/nav_received_coins"
             android:title="@string/received_coins" />
+        <item
+            android:id="@+id/nav_leaderboard"
+            android:title="@string/leaderboard"/>
         <item
             android:id="@+id/nav_sign_out"
             android:title="@string/sign_out" />

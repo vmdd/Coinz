@@ -42,7 +42,12 @@
         <activity
             android:name=".ReceivedCoinsActivity"
             android:label="@string/received_coins"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".LeaderboardActivity"
+            android:label="@string/leaderboard"
+            android:parentActivityName=".MainActivity"
+            />
     </application>
 
 </manifest>

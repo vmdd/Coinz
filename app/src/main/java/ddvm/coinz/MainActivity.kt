@@ -113,17 +113,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     //handling item selections from navigation menu
+    //starts chosen activity
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_map -> {
-                startActivity(Intent(this, MainActivity::class.java))
-            }
-            //go to wallet activity
             R.id.nav_wallet -> {
                 startActivity(Intent(this, WalletActivity::class.java))
             }
             R.id.nav_received_coins -> {
                 startActivity(Intent(this, ReceivedCoinsActivity::class.java))
+            }
+            R.id.nav_leaderboard -> {
+                startActivity(Intent(this, LeaderboardActivity::class.java))
             }
             //sign the user out
             R.id.nav_sign_out -> {

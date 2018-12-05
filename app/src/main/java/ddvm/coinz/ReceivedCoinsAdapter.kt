@@ -22,6 +22,7 @@ class ReceivedCoinsAdapter(private val coins:MutableList<Coin>, private val send
 
     //extended CoinViewHolder to bind coin sender's username
     private fun CoinViewHolder.bindSender(senders: MutableList<String>) {
+        val view = getView()        //get the view from CoinViewHolder
         view.sender.text = senders[adapterPosition]
     }
 }

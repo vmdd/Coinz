@@ -120,6 +120,7 @@ class WalletActivity : AppCompatActivity() {
 
     //gets the content of the wallet from firestore and stores it in the wallet list
     private fun fetchWallet() {
+        wallet.clear()
         firestoreWallet
                 ?.get()
                 ?.addOnSuccessListener {result ->
