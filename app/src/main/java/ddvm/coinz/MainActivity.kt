@@ -27,6 +27,8 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.mapboxsdk.annotations.Icon
+import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.Marker
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -231,8 +233,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
     private fun drawMarkers(){
+        val icons = mutableMapOf<String,Int>()
+        icons["PENY"] = R.drawable.circle_red
+        icons["DOLR"] = R.drawable.circle_green
+        icons["QUID"] = R.drawable.circle_yellow
+        icons["SHIL"] = R.drawable.circle_blue
         for(coin in coins){
-            val marker: Marker? = map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id))
+            val icon: Icon = IconFactory.getInstance(this).fromResource(icons[coin.currency]!!)
+            val marker: Marker? = map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id).icon(icon))
             if(marker == null) {
                 Log.d(tag, "[drawMarkers] marker is null")
             } else {
