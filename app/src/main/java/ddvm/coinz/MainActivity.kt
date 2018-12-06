@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val collectRange: Int = 25         //range to collect coin in meters
     private val visionRange: Int = 10000          //renge to see coin
 
-    private lateinit var originLocation: Location
+    private var originLocation: Location? = null
     private lateinit var permissionsManager: PermissionsManager
     private var locationEngine: LocationEngine? = null
     private lateinit var locationLayerPlugin: LocationLayerPlugin
@@ -109,7 +109,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        recenter_fab.setOnClickListener { setCameraPosition(originLocation) }
+        recenter_fab.setOnClickListener {
+            if(originLocation!=null)
+                setCameraPosition(originLocation!!) }
     }
 
     //handling item selections from navigation menu
@@ -218,16 +220,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             enableLocation()
 
             map?.setOnMarkerClickListener {marker ->
-                val latLng = LatLng(originLocation.latitude, originLocation.longitude)
-                val distance = marker.position.distanceTo(latLng)       //distance from the user to the coin
-                if(distance <= collectRange) {
-                    collectCoin(marker.title)
-                    Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this,
-                            "Distance to coin: ${distance.roundToInt()}m",
-                            Toast.LENGTH_SHORT)
-                            .show()
+                if(originLocation!=null) {
+                    val latLng = LatLng(originLocation!!.latitude, originLocation!!.longitude)
+                    val distance = marker.position.distanceTo(latLng)       //distance from the user to the coin
+                    if (distance <= collectRange) {
+                        collectCoin(marker.title)
+                        Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this,
+                                "Distance to coin: ${distance.roundToInt()}m",
+                                Toast.LENGTH_SHORT)
+                                .show()
+                    }
                 }
                 true
             }
@@ -309,7 +313,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             Log.d(tag, "[onLocationChanged] location is null")
         }else{
             originLocation = location
-            setCameraPosition(originLocation)
+            setCameraPosition(originLocation!!)
             //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
             if(map != null && coins.size > 0) {
                 checkCoinsInVisionRange(location)
