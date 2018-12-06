@@ -5,7 +5,6 @@ import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.NavigationView
-import android.support.design.widget.Snackbar
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
@@ -108,10 +107,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
+        recenter_fab.setOnClickListener { setCameraPosition(originLocation) }
     }
 
     //handling item selections from navigation menu
@@ -233,7 +229,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
     private fun drawMarker(coin: Coin){
-        val iconResource = selectIcon(coin.currency, coin.value)        //find coin resource file
+        val iconResource = selectIcon(coin.currency, coin.value.toInt().toString())        //find coin resource file
         val icon: Icon = IconFactory.getInstance(this).fromResource(iconResource)       //icon of the marker
         //add marker to the map
         val marker: Marker? = map?.addMarker(MarkerOptions()
@@ -249,8 +245,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     //select icon representing the coin currency and value
-    private fun selectIcon(currency: String, value: Double): Int {
-        val select = currency + value.toInt().toString()
+    //if value of the coin is not passed, returns icon without number
+    private fun selectIcon(currency: String, displayValue: String = ""): Int {
+        val select = currency + displayValue
         val icons = mutableMapOf<String, Int>()
         icons["PENY"] = R.drawable.red
         icons["PENY0"] = R.drawable.red_0
