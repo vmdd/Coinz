@@ -29,7 +29,6 @@ class ReceivedCoinsActivity : AppCompatActivity() {
 
     private var currentGold = 0.0                               //to store user's current gold
 
-    private val preferencesFile = "MyPrefsFile"
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -157,6 +156,6 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         super.onStart()
 
         //read shared preferences file and exchange rates for coins
-        exchangeRates.putAll(Utils.getExchangeRates(this, preferencesFile))
+        exchangeRates.putAll(Utils.getExchangeRates(this))
     }
 }

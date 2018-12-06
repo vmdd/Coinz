@@ -1,14 +1,16 @@
 package ddvm.coinz
 
 import android.content.Context
-import com.google.firebase.firestore.FirebaseFirestore
+import android.util.Log
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
 object Utils {
     //gets exchange rates and stores them in the map
+    private val tag = "Utils"
+    private val preferencesFile = "MyPrefsFile"
 
-    fun getExchangeRates(context: Context, preferencesFile: String): MutableMap<String,Double> {
+    fun getExchangeRates(context: Context): MutableMap<String,Double> {
 
         val prefsSettings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         val mapJson = prefsSettings.getString("mapJson","")
@@ -22,6 +24,28 @@ object Utils {
         exchangeRates["PENY"] = rates.get("PENY").asDouble
 
         return exchangeRates
+    }
+
+    fun saveMapToSharedPrefs(context: Context, downloadDate: String, mapJson: String) {
+        Log.d(tag, "[saveMapToSharedPrefs] Storing lastDownloadDate of $downloadDate")
+        //saving download date and mapJson in shared preferences
+        val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        val editor = settings.edit()
+        editor.putString("lastDownloadDate", downloadDate)
+        editor.putString("mapJson", mapJson)
+        editor.apply()
+    }
+
+    fun getLastDownloadDateFromSharedPrefs (context: Context): String {
+        val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        val downloadDate = settings.getString("lastDownloadDate", "")  //last download date
+        return downloadDate
+    }
+
+    fun getMapFromSharedPrefs (context: Context): String {
+        val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        val mapJson = settings.getString("mapJson","")
+        return mapJson
     }
 
     //select icon representing the coin currency and value

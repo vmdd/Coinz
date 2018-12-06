@@ -24,8 +24,6 @@ class WalletActivity : AppCompatActivity() {
     private var firestoreWallet: CollectionReference? = null    //collection storing user's coins in the wallet
     private var firestoreUser: DocumentReference? = null        //user document
 
-    private val preferencesFile = "MyPrefsFile"
-
     private var username = ""
     private var currentGold = 0.0                               //to store user's current gold
     private var nPaidInCoins = 0                                //to keep track of number of coins paid in today
@@ -241,6 +239,6 @@ class WalletActivity : AppCompatActivity() {
         super.onStart()
 
         //read shared preferences file and exchange rates for coins
-        exchangeRates.putAll(Utils.getExchangeRates(this, preferencesFile))
+        exchangeRates.putAll(Utils.getExchangeRates(this))
     }
 }
