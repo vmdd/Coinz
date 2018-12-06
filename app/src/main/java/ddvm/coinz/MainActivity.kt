@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private val collectRange: Int = 25         //range to collect coin in meters
-    private val visionRange: Int = 50          //renge to see coin
+    private val visionRange: Int = 10000          //renge to see coin
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -233,19 +233,70 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
     private fun drawMarker(coin: Coin){
-        val icons = mutableMapOf<String,Int>()
-        icons["PENY"] = R.drawable.circle_red
-        icons["DOLR"] = R.drawable.circle_green
-        icons["QUID"] = R.drawable.circle_yellow
-        icons["SHIL"] = R.drawable.circle_blue
-        val icon: Icon = IconFactory.getInstance(this).fromResource(icons[coin.currency]!!)
-        val marker: Marker? = map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id).icon(icon))
+        val iconResource = selectIcon(coin.currency, coin.value)        //find coin resource file
+        val icon: Icon = IconFactory.getInstance(this).fromResource(iconResource)       //icon of the marker
+        //add marker to the map
+        val marker: Marker? = map?.addMarker(MarkerOptions()
+                .position(coin.coordinates)
+                .title(coin.id)
+                .icon(icon))
         if(marker == null) {
             Log.d(tag, "[drawMarkers] marker is null")
         } else {
             coinsMarkersMap[coin.id] = marker.id
         }
         Log.d(tag, "[drawMarkers] number of markers on the map ${map?.markers?.size}")
+    }
+
+    //select icon representing the coin currency and value
+    private fun selectIcon(currency: String, value: Double): Int {
+        val select = currency + value.toInt().toString()
+        val icons = mutableMapOf<String, Int>()
+        icons["PENY"] = R.drawable.red
+        icons["PENY0"] = R.drawable.red_0
+        icons["PENY1"] = R.drawable.red_1
+        icons["PENY2"] = R.drawable.red_2
+        icons["PENY3"] = R.drawable.red_3
+        icons["PENY4"] = R.drawable.red_4
+        icons["PENY5"] = R.drawable.red_5
+        icons["PENY6"] = R.drawable.red_6
+        icons["PENY7"] = R.drawable.red_7
+        icons["PENY8"] = R.drawable.red_8
+        icons["PENY9"] = R.drawable.red_9
+        icons["DOLR"] = R.drawable.green
+        icons["DOLR0"] = R.drawable.green_0
+        icons["DOLR1"] = R.drawable.green_1
+        icons["DOLR2"] = R.drawable.green_2
+        icons["DOLR3"] = R.drawable.green_3
+        icons["DOLR4"] = R.drawable.green_4
+        icons["DOLR5"] = R.drawable.green_5
+        icons["DOLR6"] = R.drawable.green_6
+        icons["DOLR7"] = R.drawable.green_7
+        icons["DOLR8"] = R.drawable.green_8
+        icons["DOLR9"] = R.drawable.green_9
+        icons["QUID"] = R.drawable.yellow
+        icons["QUID0"] = R.drawable.yellow_0
+        icons["QUID1"] = R.drawable.yellow_1
+        icons["QUID2"] = R.drawable.yellow_2
+        icons["QUID3"] = R.drawable.yellow_3
+        icons["QUID4"] = R.drawable.yellow_4
+        icons["QUID5"] = R.drawable.yellow_5
+        icons["QUID6"] = R.drawable.yellow_6
+        icons["QUID7"] = R.drawable.yellow_7
+        icons["QUID8"] = R.drawable.yellow_8
+        icons["QUID9"] = R.drawable.yellow_9
+        icons["SHIL"] = R.drawable.blue
+        icons["SHIL0"] = R.drawable.blue_0
+        icons["SHIL1"] = R.drawable.blue_1
+        icons["SHIL2"] = R.drawable.blue_2
+        icons["SHIL3"] = R.drawable.blue_3
+        icons["SHIL4"] = R.drawable.blue_4
+        icons["SHIL5"] = R.drawable.blue_5
+        icons["SHIL6"] = R.drawable.blue_6
+        icons["SHIL7"] = R.drawable.blue_7
+        icons["SHIL8"] = R.drawable.blue_8
+        icons["SHIL9"] = R.drawable.blue_9
+        return icons[select]!!
     }
 
     private fun enableLocation() {
