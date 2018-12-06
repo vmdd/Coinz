@@ -1,11 +1,13 @@
 package ddvm.coinz
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_received_coin.view.*
 
 //inherited CoinsAdapter, modified to bind sender field
-class ReceivedCoinsAdapter(private val coins:MutableList<Coin>, private val senders:MutableList<String>): CoinsAdapter(coins) {
+class ReceivedCoinsAdapter(context: Context, private val coins:MutableList<Coin>,
+                           private val senders:MutableList<String>): CoinsAdapter(context, coins) {
 
     //overrided to include another item layout
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoinViewHolder {

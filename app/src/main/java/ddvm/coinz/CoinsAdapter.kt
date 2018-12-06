@@ -1,14 +1,15 @@
 package ddvm.coinz
 
+import android.content.Context
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_coin.view.*
-import kotlin.math.roundToInt
 
-open class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
+open class CoinsAdapter(private val context: Context, private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
 
     private val itemStateArray = SparseBooleanArray()   //array storing position of selected coins
 
@@ -37,11 +38,11 @@ open class CoinsAdapter(private val coins:MutableList<Coin>): RecyclerView.Adapt
         fun bindCoin(coin: Coin) {
             this.coin = coin
             view.coin_currency.text = coin.currency
-            view.coin_value.text = coin.value.roundToInt().toString()   //rounds the value of the coin for display
             view.item_checkBox.isChecked = itemStateArray.get(adapterPosition)  //set the textbox to the correct state
             view.setOnClickListener { v -> coinItemClicked(v) }
             view.item_checkBox.setOnClickListener { v -> coinItemClicked(v)}
-
+            val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())
+            view.coin_icon.setImageDrawable(ContextCompat.getDrawable(context, iconResource))
         }
 
         //changes the checkbox state and stores it in the itemStateArray

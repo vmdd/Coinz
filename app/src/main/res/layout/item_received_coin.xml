@@ -2,18 +2,20 @@
 
 <!-- layout for each coin received from another user -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingEnd="@dimen/activity_horizontal_margin">   <!-- each item has only enough space to display information -->
 
-    <!-- text view for coin value -->
-    <TextView
-        android:id="@+id/coin_value"
-        android:layout_width="1dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+    <!-- coin icon -->
+    <ImageView
+        android:id="@+id/coin_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        tools:ignore="contentDescription"/>
 
     <!-- text view for coin currency -->
 

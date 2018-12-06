@@ -56,7 +56,7 @@ class WalletActivity : AppCompatActivity() {
                 ?.collection("wallet")
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = CoinsAdapter(wallet)
+        viewAdapter = CoinsAdapter(this, wallet)
 
         coins_recycler_view.apply {
             setHasFixedSize(true)
