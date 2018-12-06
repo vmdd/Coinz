@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
@@ -43,6 +44,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_main_bar.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,
         PermissionsListener, DownloadCompleteListener, NavigationView.OnNavigationItemSelectedListener {
@@ -222,8 +224,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //make location information available
             enableLocation()
-            //add markers to the map
-            //drawMarkers()
+
+            map?.setOnMarkerClickListener {marker ->
+                val latLng = LatLng(originLocation.latitude, originLocation.longitude)
+                val distance = marker.position.distanceTo(latLng)       //distance from the user to the coin
+                if(distance <= collectRange) {
+                    collectCoin(marker.title)
+                    Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this,
+                            "Distance to coin: ${distance.roundToInt()}m",
+                            Toast.LENGTH_SHORT)
+                            .show()
+                }
+                true
+            }
         }
     }
 
@@ -357,12 +372,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
             if(map != null && coins.size > 0) {
                 checkCoinsInVisionRange(location)
-                checkCoinsInRange(location)
+                //checkCoinsInRange(location)
             }
         }
     }
 
-    //detecting coins in range for collection
+    //detecting coins in range for automatic collection
     private fun checkCoinsInRange(location: Location){
         val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
         val coinsIterator = coins.iterator()
@@ -376,6 +391,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
+    }
+
+    //collect the coin given it's id
+    private fun collectCoin(coinId: String) {
+        val coinsIterator = coins.iterator()
+        for(coin in coinsIterator) {
+            if (coin.id == coinId) {
+                firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in wallet
+                //note which coins collected already, to not display them in the future
+                firestoreUser?.update("collected_coins", FieldValue.arrayUnion(coin.id))
+                removeMarker(coin)          //remove the marker
+                coinsIterator.remove()      //remove from coins list
+                break                       //break, there is only one coin with given id
+            }
+        }
     }
 
     private fun checkCoinsInVisionRange(location: Location) {
