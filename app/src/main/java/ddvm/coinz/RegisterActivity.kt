@@ -142,7 +142,11 @@ class RegisterActivity : AppCompatActivity(){
         firestoreUser = firestore?.collection("users")?.document(mUser.uid)     //document id is user's id
         //add username
         firestoreUser?.set(mapOf("username" to username,
-                "lowercase_username" to username.toLowerCase()))
+                "lowercase_username" to username.toLowerCase(),
+                "n_paid_in_coins" to 0,
+                "last_play_date" to "",
+                "gold" to 0,
+                "collected_coins" to emptyList<String>()))
                 ?.addOnSuccessListener {
                     Log.d(tag, "[createUserDocument] user document successfully created")
                     goToMain()
