@@ -67,9 +67,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
     private var collectedCoins: MutableList<*>? = null  //coins already collected, not available for collection
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
-    //private var user: User? = null
 
     private val collectRange: Int = 25         //range to collect coin in meters
+    private val visionRange: Int = 50          //renge to see coin
 
     private lateinit var originLocation: Location
     private lateinit var permissionsManager: PermissionsManager
@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
 
-        drawMarkers()
+        //drawMarkers()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
@@ -227,25 +227,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             //make location information available
             enableLocation()
             //add markers to the map
-            drawMarkers()
+            //drawMarkers()
         }
     }
 
     //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
-    private fun drawMarkers(){
+    private fun drawMarker(coin: Coin){
         val icons = mutableMapOf<String,Int>()
         icons["PENY"] = R.drawable.circle_red
         icons["DOLR"] = R.drawable.circle_green
         icons["QUID"] = R.drawable.circle_yellow
         icons["SHIL"] = R.drawable.circle_blue
-        for(coin in coins){
-            val icon: Icon = IconFactory.getInstance(this).fromResource(icons[coin.currency]!!)
-            val marker: Marker? = map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id).icon(icon))
-            if(marker == null) {
-                Log.d(tag, "[drawMarkers] marker is null")
-            } else {
-                coinsMarkersMap[coin.id] = marker.id
-            }
+        val icon: Icon = IconFactory.getInstance(this).fromResource(icons[coin.currency]!!)
+        val marker: Marker? = map?.addMarker(MarkerOptions().position(coin.coordinates).title(coin.id).icon(icon))
+        if(marker == null) {
+            Log.d(tag, "[drawMarkers] marker is null")
+        } else {
+            coinsMarkersMap[coin.id] = marker.id
         }
         Log.d(tag, "[drawMarkers] number of markers on the map ${map?.markers?.size}")
     }
@@ -308,8 +306,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }else{
             originLocation = location
             setCameraPosition(originLocation)
-            checkCoinsInRange(location)
-
+            //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
+            if(map != null && coins.size > 0) {
+                checkCoinsInVisionRange(location)
+                checkCoinsInRange(location)
+            }
         }
     }
 
@@ -329,6 +330,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
     }
 
+    private fun checkCoinsInVisionRange(location: Location) {
+        val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
+        for(coin in coins) {
+            val markerId = coinsMarkersMap[coin.id]
+            if(coin.inRange(latLng, visionRange)) {
+                if(markerId == null)
+                    drawMarker(coin)
+            } else {
+                if(markerId != null) {
+                    removeMarker(coin)
+                }
+            }
+        }
+    }
+
     //removes marker representing the coin
     private fun removeMarker(coin:Coin) {
         val markerId: Long? = coinsMarkersMap[coin.id]
@@ -342,6 +358,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     }
                 }
             }
+        coinsMarkersMap.remove(coin.id)
     }
 
     override fun onConnected() {
