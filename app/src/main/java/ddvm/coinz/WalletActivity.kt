@@ -1,6 +1,5 @@
 package ddvm.coinz
 
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -10,8 +9,6 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 
 import kotlinx.android.synthetic.main.activity_wallet.*
 
@@ -28,7 +25,6 @@ class WalletActivity : AppCompatActivity() {
     private var firestoreUser: DocumentReference? = null        //user document
 
     private val preferencesFile = "MyPrefsFile"
-    private var mapJson = ""
 
     private var username = ""
     private var currentGold = 0.0                               //to store user's current gold
@@ -43,10 +39,6 @@ class WalletActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
-
-        //dummy coins for testing
-        //coins.add(Coin("123",2.0 , "GOLD" , 5, "doesnt batter", LatLng(0.0,0.0)))
-        //coins.add(Coin("133",3.0 , "PPP" , 5, "doesnt batter", LatLng(0.0,0.0)))
 
         mAuth = FirebaseAuth.getInstance()
         mUser = mAuth?.currentUser
@@ -135,25 +127,6 @@ class WalletActivity : AppCompatActivity() {
                 }
     }
 
-    //gets exchange rates and stores them in the map
-    private fun getExchangeRates(json: String) {
-        val j: JsonObject = JsonParser().parse(json).asJsonObject
-        val rates = j.get("rates").asJsonObject
-        exchangeRates["SHIL"] = rates.get("SHIL").asDouble
-        exchangeRates["DOLR"] = rates.get("DOLR").asDouble
-        exchangeRates["QUID"] = rates.get("QUID").asDouble
-        exchangeRates["PENY"] = rates.get("PENY").asDouble
-    }
-
-    private fun convertToGold(coin: Coin): Double {
-        return if(exchangeRates[coin.currency]!=null) {
-            coin.value * exchangeRates[coin.currency]!!
-        } else {
-            Log.d(tag, "[convertToGold()] unknown currency")
-            0.0
-        }
-    }
-
     private fun discardSelectedCoins() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
 
@@ -177,7 +150,7 @@ class WalletActivity : AppCompatActivity() {
         for(i in itemsStates.size()-1 downTo 0) {
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
-                gold += convertToGold(wallet[position])
+                gold += wallet[position].toGold(exchangeRates)
                 removeCoin(position)
                 nStoredCoins += 1
             }
@@ -268,8 +241,6 @@ class WalletActivity : AppCompatActivity() {
         super.onStart()
 
         //read shared preferences file and exchange rates for coins
-        val prefsSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
-        mapJson = prefsSettings.getString("mapJson","")
-        getExchangeRates(mapJson)
+        exchangeRates.putAll(Utils.getExchangeRates(this, preferencesFile))
     }
 }

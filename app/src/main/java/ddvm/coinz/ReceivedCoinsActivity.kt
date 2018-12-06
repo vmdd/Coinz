@@ -1,6 +1,6 @@
 package ddvm.coinz
 
-import android.content.Context
+
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -12,8 +12,6 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_received_coins.*
 
 class ReceivedCoinsActivity : AppCompatActivity() {
@@ -32,7 +30,6 @@ class ReceivedCoinsActivity : AppCompatActivity() {
     private var currentGold = 0.0                               //to store user's current gold
 
     private val preferencesFile = "MyPrefsFile"
-    private var mapJson = ""
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -78,15 +75,6 @@ class ReceivedCoinsActivity : AppCompatActivity() {
 
     }
 
-    private fun convertToGold(coin: Coin): Double {
-        return if(exchangeRates[coin.currency]!=null) {
-            coin.value * exchangeRates[coin.currency]!!
-        } else {
-            Log.d(tag, "[convertToGold()] unknown currency")
-            0.0
-        }
-    }
-
     private fun discardSelectedCoins() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
 
@@ -109,7 +97,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         for(i in itemsStates.size()-1 downTo 0) {
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
-                gold += convertToGold(receivedCoins[position])
+                gold += receivedCoins[position].toGold(exchangeRates)
                 removeCoin(position)
             }
         }
@@ -165,22 +153,10 @@ class ReceivedCoinsActivity : AppCompatActivity() {
                 }
     }
 
-    //gets exchange rates and stores them in the map
-    private fun getExchangeRates(json: String) {
-        val j: JsonObject = JsonParser().parse(json).asJsonObject
-        val rates = j.get("rates").asJsonObject
-        exchangeRates["SHIL"] = rates.get("SHIL").asDouble
-        exchangeRates["DOLR"] = rates.get("DOLR").asDouble
-        exchangeRates["QUID"] = rates.get("QUID").asDouble
-        exchangeRates["PENY"] = rates.get("PENY").asDouble
-    }
-
     override fun onStart() {
         super.onStart()
 
         //read shared preferences file and exchange rates for coins
-        val prefsSettings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
-        mapJson = prefsSettings.getString("mapJson","")
-        getExchangeRates(mapJson)
+        exchangeRates.putAll(Utils.getExchangeRates(this, preferencesFile))
     }
 }
