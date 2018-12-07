@@ -56,8 +56,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
-    private var firestoreUser: DocumentReference? = null        //user document
-    private var firestoreWallet: CollectionReference? = null    //collection storing user's coins in the wallet
 
     private var downloadDate = ""   //date of last downloaded map, format yyyy/MM/dd
     //private val preferencesFile = "MyPrefsFile"
@@ -65,7 +63,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var dateFormatted = ""   //current date formated as string
 
     private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
-    private var collectedCoins: MutableList<*>? = null  //coins already collected, not available for collection
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private val collectRange: Int = 25         //range to collect coin in meters
@@ -92,8 +89,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         firestore?.firestoreSettings = settings
-        firestoreUser = firestore?.collection("users")?.document(mUser!!.uid)  //after login mUser shouldn't be null
-        firestoreWallet = firestoreUser?.collection("wallet")
 
         //MapBox
         Mapbox.getInstance(this, getString(R.string.access_token))
@@ -141,75 +136,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         return true
     }
 
-    //runs after geo-JSON map is downloaded
-    override fun downloadComplete(result: String) {
-        mapJson = result    //for storage in shared preferences
-        downloadUserData()
-        Utils.saveMapToSharedPrefs(this, downloadDate, mapJson)
-    }
-
-
-
-    //downloads id of coins that already have been collected on given day
-    //clears out the list of coins collected previously and resets the daily limit of coins to pay in the bank
-    private fun downloadUserData() {
-        //load user data from firestore
-        firestoreUser?.get()
-                ?.addOnSuccessListener { document ->
-                    if(document != null && document.exists()) {
-                        //if firestore stores collected coins from the current day, then get them and store in collectedCoins
-                        //else set the day to current and clear the collected_coins array in firestore
-                        collectedCoins = if(document.data?.get("last_play_date") == dateFormatted) {
-                            document.data?.get("collected_coins") as? MutableList<*>
-                        } else {
-                            firestoreUser
-                                    ?.update("last_play_date", dateFormatted,
-                                            "collected_coins", emptyList<String>(), //no coins collected today
-                                            "n_paid_in_coins", 0)     //no coins paid in today yet
-                            mutableListOf<String>() //setting collectedCoins to empty list since all coins will be available on the map
-                        }
-                        //generate list of coins available to be collected
-                        getCoinsFromJson(mapJson)
-                    } else {
-                        Log.d(tag, "[onStart] no user document")
-                    }
-                }
-                ?.addOnFailureListener { exception ->
-                    Log.d(tag, "[onStart] get failed with ", exception)
-                }
-    }
-
-    //parses the json file, creates Coin objects and adds them to the coins list
-    //only adds coins that are still available for collection
-    private fun getCoinsFromJson(json: String){
-        if(collectedCoins == null)
-            return
-        val fc = FeatureCollection.fromJson(json)
-        if(fc.features() != null) {
-            //reading coin attributes from Json and creating a Coin object
-            for (f: Feature in fc.features()!!) {
-                if(f.properties() != null) {
-                    val j: JsonObject = f.properties()!!
-                    val id = j.get("id").asString
-                    val value = j.get("value").asDouble
-                    val currency = j.get("currency").asString
-                    val markerSymbol = j.get("marker-symbol").asInt
-                    val markerColor = j.get("marker-color").asString
-                    val g: Geometry? = f.geometry()
-                    val coordinates: LatLng
-                    if (g is Point) {
-                        coordinates = LatLng(g.latitude(), g.longitude())
-                        //add coin to the list only if it hasn't been collected already
-                        if (!collectedCoins!!.contains(id))  //null checked already
-                            coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
-                    }
-                }
-            }
-        }
-        //displays coins if other asynctasks finished
-        displayInitialCoins()
-    }
-
     override fun onMapReady(mapboxMap: MapboxMap?) {
         if(mapboxMap == null){
             Log.d(tag, "[onMapReady] mapboxMap is null")
@@ -221,8 +147,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //make location information available
             enableLocation()
-            //display coins if they are already downloaded and location is determined
-            displayInitialCoins()
 
             map?.setOnMarkerClickListener {marker ->
                 if(originLocation!=null) {
@@ -241,23 +165,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 true
             }
         }
-    }
-
-    //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
-    private fun drawMarker(coin: Coin){
-        val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())        //find coin resource file
-        val icon: Icon = IconFactory.getInstance(this).fromResource(iconResource)       //icon of the marker
-        //add marker to the map
-        val marker: Marker? = map?.addMarker(MarkerOptions()
-                .position(coin.coordinates)
-                .title(coin.id)
-                .icon(icon))
-        if(marker == null) {
-            Log.d(tag, "[drawMarkers] marker is null")
-        } else {
-            coinsMarkersMap[coin.id] = marker.id
-        }
-        Log.d(tag, "[drawMarkers] number of markers on the map ${map?.markers?.size}")
     }
 
 
@@ -325,41 +232,110 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             if(map != null && coins.size > 0) {
                 displayCoinsInVisionRange(location)
                 if(autocollection)
-                    collectCoinsInRange(location)
+                    collectCoinsInRange(location)       //collect coins automatically when user in range
             }
         }
     }
 
-    //detecting coins in range for automatic collection
-    private fun collectCoinsInRange(location: Location){
-        val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
-        val coinsIterator = coins.iterator()
-        for(coin in coinsIterator) {
-            if (coin.inRange(latLng, collectRange)) {
-                firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in wallet
-                //note which coins collected already, to not display them in the future
-                firestoreUser?.update("collected_coins", FieldValue.arrayUnion(coin.id))
-                removeMarker(coin)
-                coinsIterator.remove()
-                Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
-            }
-        }
-        //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
+
+    override fun onStart() {
+        super.onStart()
+        mapView?.onStart()
+
+        //SIGSEGV
+        try {
+            locationEngine?.requestLocationUpdates()
+        } catch(ignored: SecurityException) {}
+        locationEngine?.addLocationEngineListener(this)
+
+        //current date
+        val curDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        dateFormatted = curDate.format(formatter)   //current date
+
+        //check if map for a given day already downloaded, else download it
+        User.downloadUserData(mAuth, firestore) {userDataDownloaded()}
+        getGeoJsonMap()
     }
 
-    //collect the coin given it's id
-    private fun collectCoin(coinId: String) {
-        val coinsIterator = coins.iterator()
-        for(coin in coinsIterator) {
-            if (coin.id == coinId) {
-                firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in wallet
-                //note which coins collected already, to not display them in the future
-                firestoreUser?.update("collected_coins", FieldValue.arrayUnion(coin.id))
-                removeMarker(coin)          //remove the marker
-                coinsIterator.remove()      //remove from coins list
-                break                       //break, there is only one coin with given id
+    //runs after the user data is downloaded
+    private fun userDataDownloaded() {
+        updateUserData()
+        getCoinsFromJson()
+    }
+
+    //check the date of the last downloaded map stored in shared preferences
+    //download a new map if necessary
+    private fun getGeoJsonMap() {
+        downloadDate = Utils.getLastDownloadDateFromSharedPrefs(this)
+        if(dateFormatted == downloadDate) {
+            mapJson = Utils.getMapFromSharedPrefs(this)
+            getCoinsFromJson()
+        } else {
+            downloadDate = dateFormatted
+            val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
+            DownloadFileTask(this).execute(url)     //downloads the map
+        }
+    }
+
+    //check if last played date is today.
+    //If not then reset collected coins, number of coins paid into the bank and set the current play date
+    private fun updateUserData() {
+        if(User.getLastPlayDate() != dateFormatted){
+            User.setLastPlayDate(firestore, dateFormatted)
+            User.clearCollectedCoins(firestore)
+            User.clearNPaidInCoins(firestore)
+        }
+    }
+
+    //runs after geo-JSON map is downloaded
+    override fun downloadComplete(result: String) {
+        mapJson = result    //for storage in shared preferences
+        Utils.saveMapToSharedPrefs(this, downloadDate, mapJson)
+        Log.d(tag, "[downloadComplete] downloaded new map, date: $downloadDate")
+        getCoinsFromJson()
+    }
+
+    //parses the json file, creates Coin objects and adds them to the coins list
+    //only adds coins that are still available for collection
+    //called twice after user data finish downloading and after geoJson map is downloaded
+    private fun getCoinsFromJson(){
+        //check if both user data and geoJson map downloaded
+        if(User.getCollectedCoins() == null || mapJson == "")
+            return
+        val fc = FeatureCollection.fromJson(mapJson)
+        if(fc.features() != null) {
+            //reading coin attributes from Json and creating a Coin object
+            for (f: Feature in fc.features()!!) {
+                if(f.properties() != null) {
+                    val j: JsonObject = f.properties()!!
+                    val id = j.get("id").asString
+                    val value = j.get("value").asDouble
+                    val currency = j.get("currency").asString
+                    val markerSymbol = j.get("marker-symbol").asInt
+                    val markerColor = j.get("marker-color").asString
+                    val g: Geometry? = f.geometry()
+                    val coordinates: LatLng
+                    if (g is Point) {
+                        coordinates = LatLng(g.latitude(), g.longitude())
+                        //add coin to the list only if it hasn't been collected already
+                        if (!User.getCollectedCoins()!!.contains(id))  //null checked already
+                            coins.add(Coin(id, value, currency, markerSymbol, markerColor, coordinates))
+                    }
+                }
             }
         }
+
+        displayInitialCoins()
+    }
+
+    //this funcion is run once after all asynctasks are done,
+    //when map and coins are downloaded and location determined
+    private fun displayInitialCoins() {
+        if(originLocation!=null && coins.size>0) {
+            displayCoinsInVisionRange(originLocation!!)
+        }
+        Log.d(tag, "[displayInitialCoins] map $map, location: $originLocation, coins: ${coins.size}")
     }
 
     private fun displayCoinsInVisionRange(location: Location) {
@@ -377,6 +353,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
+    private fun drawMarker(coin: Coin){
+        val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())        //find coin resource file
+        val icon: Icon = IconFactory.getInstance(this).fromResource(iconResource)       //icon of the marker
+        //add marker to the map
+        val marker: Marker? = map?.addMarker(MarkerOptions()
+                .position(coin.coordinates)
+                .title(coin.id)
+                .icon(icon))
+        if(marker == null) {
+            Log.d(tag, "[drawMarkers] marker is null")
+        } else {
+            coinsMarkersMap[coin.id] = marker.id
+        }
+        Log.d(tag, "[drawMarkers] number of markers on the map ${map?.markers?.size}")
+    }
+
     //removes marker representing the coin
     private fun removeMarker(coin:Coin) {
         val markerId: Long? = coinsMarkersMap[coin.id]
@@ -387,19 +380,40 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 if(markerId == marker.id) {
                     marker.remove()
                     break
-                    }
                 }
             }
+        }
         coinsMarkersMap.remove(coin.id)
     }
 
-    //this funcion is run once after all asynctasks are done,
-    //when map and coins are downloaded and location determined
-    private fun displayInitialCoins() {
-        if(map!=null && originLocation!=null && coins.size>0) {
-            displayCoinsInVisionRange(originLocation!!)
+    //collect the coin given it's id
+    private fun collectCoin(coinId: String) {
+        val coinsIterator = coins.iterator()
+        for(coin in coinsIterator) {
+            if (coin.id == coinId) {
+                User.addCollectedCoin(firestore, coin)
+                removeMarker(coin)          //remove the marker
+                coinsIterator.remove()      //remove from coins list
+                break                       //break, there is only one coin with given id
+            }
         }
     }
+
+    //detecting coins in range for automatic collection
+    private fun collectCoinsInRange(location: Location){
+        val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
+        val coinsIterator = coins.iterator()
+        for(coin in coinsIterator) {
+            if (coin.inRange(latLng, collectRange)) {
+                User.addCollectedCoin(firestore, coin)
+                removeMarker(coin)
+                coinsIterator.remove()
+                Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
+    }
+
 
     override fun onConnected() {
         Log.d(tag, "[onConnected] requesting location updates")
@@ -413,42 +427,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         } else {
             // Open a dialogue with the user
         }
-
     }
 
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
         Log.d(tag, "Permissions: $permissionsToExplain")
         // Present popup message or dialog
-    }
-
-    override fun onStart() {
-        super.onStart()
-        mapView?.onStart()
-
-        //SIGSEGV
-        try {
-            locationEngine?.requestLocationUpdates()
-        } catch(ignored: SecurityException) {}
-        locationEngine?.addLocationEngineListener(this)
-
-        //current date
-        val curDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        dateFormatted = curDate.format(formatter)   //current date
-
-        //download map or read from shared prefs
-        downloadDate = Utils.getLastDownloadDateFromSharedPrefs(this)
-        //check if map for a given day already downloaded, else download it
-        if(dateFormatted == downloadDate){
-            mapJson = Utils.getMapFromSharedPrefs(this)
-            downloadUserData()  //map is already downloaded, so download user data cointaining coins already collected on that day
-        } else{
-            downloadDate = dateFormatted
-            val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
-            DownloadFileTask(this).execute(url)
-        }
-
-
     }
 
     override fun onResume() {
