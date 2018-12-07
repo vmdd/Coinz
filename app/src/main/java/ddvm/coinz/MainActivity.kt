@@ -206,8 +206,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 }
             }
         }
-
-        //drawMarkers()
+        //displays coins if other asynctasks finished
+        displayInitialCoins()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
@@ -221,6 +221,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //make location information available
             enableLocation()
+            //display coins if they are already downloaded and location is determined
+            displayInitialCoins()
 
             map?.setOnMarkerClickListener {marker ->
                 if(originLocation!=null) {
@@ -286,6 +288,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }else{
             locationEngine?.addLocationEngineListener(this)
         }
+
+        displayInitialCoins()   //display coins if mapbox map and coin list available
     }
 
     private fun setCameraPosition(location: Location) {
@@ -319,15 +323,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             setCameraPosition(originLocation!!)
             //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
             if(map != null && coins.size > 0) {
-                checkCoinsInVisionRange(location)
+                displayCoinsInVisionRange(location)
                 if(autocollection)
-                    checkCoinsInRange(location)
+                    collectCoinsInRange(location)
             }
         }
     }
 
     //detecting coins in range for automatic collection
-    private fun checkCoinsInRange(location: Location){
+    private fun collectCoinsInRange(location: Location){
         val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
         val coinsIterator = coins.iterator()
         for(coin in coinsIterator) {
@@ -358,7 +362,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
-    private fun checkCoinsInVisionRange(location: Location) {
+    private fun displayCoinsInVisionRange(location: Location) {
         val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
         for(coin in coins) {
             val markerId = coinsMarkersMap[coin.id]
@@ -387,6 +391,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 }
             }
         coinsMarkersMap.remove(coin.id)
+    }
+
+    //this funcion is run once after all asynctasks are done,
+    //when map and coins are downloaded and location determined
+    private fun displayInitialCoins() {
+        if(map!=null && originLocation!=null && coins.size>0) {
+            displayCoinsInVisionRange(originLocation!!)
+        }
     }
 
     override fun onConnected() {
