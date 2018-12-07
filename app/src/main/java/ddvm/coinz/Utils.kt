@@ -10,6 +10,7 @@ object Utils {
     private val tag = "Utils"
     private val preferencesFile = "MyPrefsFile"
 
+    //gets exchange rates from geojson stored in shared preferences
     fun getExchangeRates(context: Context): MutableMap<String,Double> {
 
         val prefsSettings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
@@ -26,6 +27,7 @@ object Utils {
         return exchangeRates
     }
 
+    //saves geojson to the shared prefs
     fun saveMapToSharedPrefs(context: Context, downloadDate: String, mapJson: String) {
         Log.d(tag, "[saveMapToSharedPrefs] Storing lastDownloadDate of $downloadDate")
         //saving download date and mapJson in shared preferences
@@ -36,16 +38,30 @@ object Utils {
         editor.apply()
     }
 
+    //gets last download date of the map stored in shared prefs
     fun getLastDownloadDateFromSharedPrefs (context: Context): String {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         val downloadDate = settings.getString("lastDownloadDate", "")  //last download date
         return downloadDate
     }
 
+    //gets the map in shared prefs
     fun getMapFromSharedPrefs (context: Context): String {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         val mapJson = settings.getString("mapJson","")
         return mapJson
+    }
+
+    fun saveAutocollectionState(context: Context, autocollection: Boolean) {
+        val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        val editor = settings.edit()
+        editor.putBoolean("autocollection", autocollection)
+        editor.apply()
+    }
+
+    fun getAutocollectionState(context: Context): Boolean {
+        val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+        return settings.getBoolean("autocollection",false)
     }
 
     //select icon representing the coin currency and value

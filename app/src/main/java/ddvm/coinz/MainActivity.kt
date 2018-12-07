@@ -1,6 +1,5 @@
 package ddvm.coinz
 
-import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
@@ -71,6 +70,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     private val collectRange: Int = 25         //range to collect coin in meters
     private val visionRange: Int = 10000          //renge to see coin
+    private var autocollection = false
 
     private var originLocation: Location? = null
     private lateinit var permissionsManager: PermissionsManager
@@ -127,7 +127,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_leaderboard -> {
                 startActivity(Intent(this, LeaderboardActivity::class.java))
             }
-            //sign the user out
+            R.id.nav_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
+            //sign the user out and go to login screen
             R.id.nav_sign_out -> {
                 FirebaseAuth.getInstance().signOut()    //sign out the user from the current session
                 finish()
@@ -317,7 +320,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
             if(map != null && coins.size > 0) {
                 checkCoinsInVisionRange(location)
-                //checkCoinsInRange(location)
+                if(autocollection)
+                    checkCoinsInRange(location)
             }
         }
     }
@@ -333,6 +337,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 firestoreUser?.update("collected_coins", FieldValue.arrayUnion(coin.id))
                 removeMarker(coin)
                 coinsIterator.remove()
+                Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
             }
         }
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
@@ -437,6 +442,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onResume() {
         super.onResume()
         mapView?.onResume()
+        //check if user enabled autocollection which might have been changed in settings
+        autocollection = Utils.getAutocollectionState(this)
     }
 
     override fun onPause() {
