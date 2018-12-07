@@ -16,17 +16,10 @@ class WalletActivity : AppCompatActivity() {
 
     private var tag = "WalletActivity"
 
-    private var wallet = mutableListOf<Coin>()                  //coins collected by the user currently in the wallet
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var mAuth: FirebaseAuth? = null
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
-    private var firestoreWallet: CollectionReference? = null    //collection storing user's coins in the wallet
-    private var firestoreUser: DocumentReference? = null        //user document
-
-    private var username = ""
-    private var currentGold = 0.0                               //to store user's current gold
-    private var nPaidInCoins = 0                                //to keep track of number of coins paid in today
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
 
@@ -47,14 +40,9 @@ class WalletActivity : AppCompatActivity() {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         firestore?.firestoreSettings = settings
-        firestoreUser = firestore?.collection("users")
-                ?.document(mUser!!.uid)  //after login mUser shouldn't be null
-        firestoreWallet = firestore?.collection("users")
-                ?.document(mUser!!.uid)
-                ?.collection("wallet")
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = CoinsAdapter(this, wallet)
+        viewAdapter = CoinsAdapter(this, User.getWallet())
 
         coins_recycler_view.apply {
             setHasFixedSize(true)
@@ -65,22 +53,19 @@ class WalletActivity : AppCompatActivity() {
             adapter = viewAdapter
         }
 
-        getUserData()   //download user data from firestore
-        fetchWallet()   //get the content of the wallet from cloud firestore
-
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
             if(checkPayInLimit())
                 storeCoinsInBank()
             else {
                 val toast = Toast.makeText(this,
-                        "You can only pay in ${dailyLimit - nPaidInCoins} coin(s) more",
+                        "You can only pay in ${dailyLimit - User.getNPaidInCoins()} coin(s) more",
                         Toast.LENGTH_SHORT)
                 toast.show()
             }
         }
         send_coins_button.setOnClickListener {
-            if(nPaidInCoins<25) {
+            if(User.getNPaidInCoins()<25) {
                 Toast.makeText(this, "You can only send coins after storing 25 coins in the bank on a given day",
                         Toast.LENGTH_SHORT)
                         .show()
@@ -88,41 +73,6 @@ class WalletActivity : AppCompatActivity() {
                 checkRecipientValid()
             }
         }
-    }
-
-    //get user's current gold and number of coins paid in today
-    private fun getUserData() {
-        firestoreUser?.get()
-                ?.addOnSuccessListener { document ->
-                    if(document.getDouble("gold")!=null) {
-                        currentGold = document.getDouble("gold")!!
-                    }
-                    if(document.getDouble("n_paid_in_coins")!=null){
-                        nPaidInCoins = document.getDouble("n_paid_in_coins")!!.toInt()
-                    }
-                    if(document.getString("username")!=null) {
-                        username = document.getString("username")!!
-
-                    }
-                }
-                ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] get failed with ", e) }
-    }
-
-    //gets the content of the wallet from firestore and stores it in the wallet list
-    private fun fetchWallet() {
-        wallet.clear()
-        firestoreWallet
-                ?.get()
-                ?.addOnSuccessListener {result ->
-                    for(document in result) {
-                        val coin = document.toObject(Coin::class.java)
-                        wallet.add(coin)
-                        viewAdapter.notifyItemInserted(wallet.size - 1)  //updates the recycler view with new coin
-                    }
-                }
-                ?.addOnFailureListener {exception ->
-                    Log.w(tag, "[fetchWallet] Error getting documents: ", exception)
-                }
     }
 
     private fun discardSelectedCoins() {
@@ -148,18 +98,13 @@ class WalletActivity : AppCompatActivity() {
         for(i in itemsStates.size()-1 downTo 0) {
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
-                gold += wallet[position].toGold(exchangeRates)
+                gold += User.getWallet()[position].toGold(exchangeRates)
                 removeCoin(position)
                 nStoredCoins += 1
             }
         }
-        currentGold += gold             //amount of user's gold after converting coins to gold
-        nPaidInCoins += nStoredCoins    //updating number of coins paid in today
-
-        firestoreUser?.update("gold", currentGold,
-                "n_paid_in_coins", nPaidInCoins)
-                ?.addOnSuccessListener { Log.d(tag, "[storeCoinsInBank] document updated successfully") }
-                ?.addOnFailureListener { e -> Log.d(tag, "[storeCoinsInBank] error updating document", e) }
+        User.addGold(firestore, gold)            //amount of user's gold after converting coins to gold
+        User.addPaidInCoins(firestore, nStoredCoins)
 
         viewAdapter.clearItemsStates()
     }
@@ -173,26 +118,19 @@ class WalletActivity : AppCompatActivity() {
                 nCoinsToPayIn++
         }
 
-        return (dailyLimit - nPaidInCoins - nCoinsToPayIn >= 0)
+        return (dailyLimit - User.getNPaidInCoins() - nCoinsToPayIn >= 0)
     }
 
     private fun removeCoin(position: Int) {
-        val coinId = wallet[position].id    //id of the selected coin
-        wallet.removeAt(position)
+        User.removeCoinFromWallet(firestore,position)
         viewAdapter.notifyItemRemoved(position)
-
-        //remove the coin from firestore
-        firestoreWallet?.document(coinId)
-                ?.delete()
-                ?.addOnSuccessListener { Log.d(tag, "[removeCoin] coin removed from database") }
-                ?.addOnFailureListener { e -> Log.d(tag, "[removeCoin] error deleting coin document", e) }
     }
 
     private fun checkRecipientValid() {
 
         val recipientUsername = field_recipient.text.toString().toLowerCase()
         //check if the user tries to send coins to themselves
-        if(username.toLowerCase() == recipientUsername) {
+        if(User.getUsername().toLowerCase() == recipientUsername) {
             field_recipient.error = "You can't send coins to yourself!"
             return
         }
@@ -226,9 +164,9 @@ class WalletActivity : AppCompatActivity() {
             //if the item is selected it is removed
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
-                val coin = wallet[position]
+                val coin = User.getWallet()[position]
                 //store coin in recipient's collection, set document id as coin id and sender's username
-                firestoreRecipient?.document(coin.id + username)?.set(coin)
+                firestoreRecipient?.document(coin.id + User.getUsername())?.set(coin)
                 removeCoin(position)
             }
         }
