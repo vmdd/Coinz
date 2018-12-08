@@ -3,21 +3,27 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_wallet"
+            android:icon="@drawable/ic_account_balance_wallet_black_24dp"
             android:title="@string/wallet" />
         <item
             android:id="@+id/nav_send_coins"
+            android:icon="@drawable/send_coin"
             android:title="@string/send_coins" />
         <item
             android:id="@+id/nav_received_coins"
+            android:icon="@drawable/receive_coin"
             android:title="@string/received_coins" />
         <item
             android:id="@+id/nav_leaderboard"
+            android:icon="@drawable/leaderboard"
             android:title="@string/leaderboard"/>
         <item
             android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/settings" />
         <item
             android:id="@+id/nav_sign_out"
+            android:icon="@drawable/sign_out"
             android:title="@string/sign_out" />
     </group>
 
