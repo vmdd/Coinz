@@ -128,6 +128,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         Log.d(tag, "[onCreate]: mapJson $mapJson end")
     }
 
+    //updates the data in the header
+    private fun updateDrawerHeader() {
+        header_username.text = User.getUsername()
+        header_gold.text = User.getGold().toInt().toString()
+
+        val nCoins = User.getWallet().size  //number of coins in wallet
+        val maxCapacity = User.getWalletCapacity()
+        header_wallet_capacity.text = "$nCoins/$maxCapacity"
+
+    }
+
     //handling item selections from navigation menu
     //starts chosen activity
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -175,8 +186,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     val latLng = LatLng(originLocation!!.latitude, originLocation!!.longitude)
                     val distance = marker.position.distanceTo(latLng)       //distance from the user to the coin
                     if (distance <= collectRange) {
-                        collectCoin(marker.title)
-                        Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+                        if(checkSpaceInWallet()) {
+                            collectCoin(marker.title)
+                            Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this, getString(R.string.wallet_full), Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Toast.makeText(this,
                                 "Distance to coin: ${distance.roundToInt()}m",
@@ -253,7 +268,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
             if(map != null && coins.size > 0) {
                 displayCoinsInVisionRange(location)
-                if(autocollection)
+                if(autocollection)  //check if autocollection enabled and there is space in the wallet
                     collectCoinsInRange(location)       //collect coins automatically when user in range
             }
         }
@@ -285,11 +300,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         updateUserData()
         getCoinsFromJson()
         //updateDrawerHeader()
-    }
-
-    private fun updateDrawerHeader() {
-        header_username.text = User.getUsername()
-        header_gold.text = User.getGold().toInt().toString()
     }
 
     //check the date of the last downloaded map stored in shared preferences
@@ -435,6 +445,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
         val coinsIterator = coins.iterator()
         for(coin in coinsIterator) {
+            if(!checkSpaceInWallet())   //wallet full cant collect more coins
+                break
             if (coin.inRange(latLng, collectRange)) {
                 User.addCollectedCoin(firestore, coin)
                 removeMarker(coin)
@@ -443,6 +455,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
+    }
+
+    private fun checkSpaceInWallet(): Boolean {
+        return User.getWallet().size < User.getWalletCapacity()
     }
 
 

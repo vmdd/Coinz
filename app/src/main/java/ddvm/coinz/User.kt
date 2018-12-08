@@ -15,6 +15,7 @@ object User {
     private var userId: String? = null
     private val wallet = mutableListOf<Coin>()
     private val receivedCoins = mutableListOf<Coin>()
+    private var walletCapacity = 10
 
     fun downloadUserData(mAuth: FirebaseAuth?, firestore: FirebaseFirestore?, completeListener: () -> Unit) {
         val mUser = mAuth?.currentUser
@@ -90,6 +91,8 @@ object User {
     fun getWallet() = wallet
 
     fun getReceivedCoins() = receivedCoins
+
+    fun getWalletCapacity() = walletCapacity
 
     fun setLastPlayDate(firestore: FirebaseFirestore?, date: String) {
         lastPlayDate = date

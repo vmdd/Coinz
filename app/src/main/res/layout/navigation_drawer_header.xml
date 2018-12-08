@@ -46,4 +46,24 @@
         android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@+id/gold_icon"
         app:layout_constraintTop_toBottomOf="@+id/header_username" />
+
+    <ImageView
+        android:id="@+id/wallet_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toEndOf="@+id/header_gold"
+        app:layout_constraintTop_toBottomOf="@+id/header_username"
+        app:srcCompat="@drawable/wallet" />
+
+    <TextView
+        android:id="@+id/header_wallet_capacity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/wallet_icon"
+        app:layout_constraintTop_toBottomOf="@+id/header_username" />
 </android.support.constraint.ConstraintLayout>

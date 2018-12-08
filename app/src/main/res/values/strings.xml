@@ -26,6 +26,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="sign_out">Sign out</string>
 
+    <!-- main activity strings -->
+    <string name="wallet_full">No space in the wallet!</string>
+
     <!-- wallet strings -->
     <string name="wallet">Wallet</string>
     <string name="discard_coin">Discard</string>
