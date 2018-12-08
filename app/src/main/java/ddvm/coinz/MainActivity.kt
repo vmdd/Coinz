@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private val collectRange: Int = 25         //range to collect coin in meters
-    private val visionRange: Int = 10000          //renge to see coin
     private var autocollection = false
 
     private var originLocation: Location? = null
@@ -132,11 +131,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private fun updateDrawerHeader() {
         header_username.text = User.getUsername()
         header_gold.text = User.getGold().toInt().toString()
+        header_vision_range.text = User.getVisionRange().toString()
 
         val nCoins = User.getWallet().size  //number of coins in wallet
         val maxCapacity = User.getWalletCapacity()
         header_wallet_capacity.text = "$nCoins/$maxCapacity"
-
     }
 
     //handling item selections from navigation menu
@@ -383,7 +382,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
         for(coin in coins) {
             val markerId = coinsMarkersMap[coin.id]
-            if(coin.inRange(latLng, visionRange)) {
+            if(coin.inRange(latLng, User.getVisionRange())) {
                 if(markerId == null)
                     drawMarker(coin)
             } else {

@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/coin_logo_256"
@@ -22,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:textSize="24sp"
         app:layout_constraintStart_toEndOf="@+id/header_icon"
         app:layout_constraintTop_toTopOf="parent" />
@@ -33,7 +35,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toEndOf="@+id/header_icon"
-        app:layout_constraintTop_toBottomOf="@+id/header_username"
+        app:layout_constraintTop_toBottomOf="@+id/vision_range_icon"
         app:srcCompat="@drawable/gold"
         tools:ignore="ContentDescription"/>
 
@@ -45,25 +47,43 @@
         android:layout_marginTop="8dp"
         android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@+id/gold_icon"
-        app:layout_constraintTop_toBottomOf="@+id/header_username" />
+        app:layout_constraintTop_toBottomOf="@+id/vision_range_icon" />
 
     <ImageView
         android:id="@+id/wallet_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toEndOf="@+id/header_gold"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@+id/header_vision_range"
         app:layout_constraintTop_toBottomOf="@+id/header_username"
-        app:srcCompat="@drawable/wallet" />
+        app:srcCompat="@drawable/wallet"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/header_wallet_capacity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@+id/wallet_icon"
+        app:layout_constraintTop_toBottomOf="@+id/header_username" />
+
+    <ImageView
+        android:id="@+id/vision_range_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/header_icon"
+        app:layout_constraintTop_toBottomOf="@+id/header_username"
+        app:srcCompat="@drawable/vision_range"
+        tools:ignore="ContentDescription"/>
+
+    <TextView
+        android:id="@+id/header_vision_range"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textSize = "16sp"
+        app:layout_constraintStart_toEndOf="@id/vision_range_icon"
         app:layout_constraintTop_toBottomOf="@+id/header_username" />
 </android.support.constraint.ConstraintLayout>
