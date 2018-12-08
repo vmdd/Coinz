@@ -7,7 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 object User {
     private val tag = "User"
-    private var username: String? = null
+    private var username: String = ""
     private var collectedCoins: MutableList<*>? = null
     private var gold: Double = 0.0
     private var lastPlayDate: String? = null
@@ -23,7 +23,8 @@ object User {
         val firestoreUser = firestore?.collection("users")?.document(userId!!)  //after login mUser shouldn't be null
 
         firestoreUser?.get()?.addOnSuccessListener {document ->
-            username = document.getString("username")
+            if(document.getString("username")!=null)
+                username = document.getString("username")!!
             collectedCoins = document.data?.get("collected_coins") as? MutableList<*>
             lastPlayDate = document.getString("last_play_date")
 
@@ -76,12 +77,7 @@ object User {
 
     }
 
-    fun getUsername(): String {
-        return if(username!=null)
-            username!!
-        else
-            ""
-    }
+    fun getUsername() = username
 
     fun getLastPlayDate() = lastPlayDate
 

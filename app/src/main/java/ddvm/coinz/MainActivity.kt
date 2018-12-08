@@ -5,11 +5,12 @@ import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -41,12 +42,14 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_main_bar.*
+import kotlinx.android.synthetic.main.navigation_drawer_header.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,
-        PermissionsListener, DownloadCompleteListener, NavigationView.OnNavigationItemSelectedListener {
+        PermissionsListener, DownloadCompleteListener,
+        NavigationView.OnNavigationItemSelectedListener{
 
     private val tag = "MainActivity"
 
@@ -78,6 +81,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_menu)
+        }
 
         //Firebase authentication
         mAuth = FirebaseAuth.getInstance()
@@ -97,16 +104,25 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         mapView?.getMapAsync(this)
 
         //Navigation drawer
-        val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close)  //toggle to open nav drawer
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
         nav_view.setNavigationItemSelectedListener(this)
+
+        drawer_layout.addDrawerListener(
+                object : DrawerLayout.DrawerListener {
+                    override fun onDrawerOpened(drawerView: View) {}
+                    override fun onDrawerClosed(drawerView: View) {}
+                    override fun onDrawerStateChanged(newState: Int) {}
+                    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                        updateDrawerHeader()
+                    }
+                }
+        )
 
         recenter_fab.setOnClickListener {
             if(originLocation!=null)
                 setCameraPosition(originLocation!!) }
+
+        //download user data from firestore
+        User.downloadUserData(mAuth, firestore) {userDataDownloaded()}
 
         Log.d(tag,"[onCreate]: coins size: ${coins.size}")
         Log.d(tag, "[onCreate]: mapJson $mapJson end")
@@ -260,14 +276,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         dateFormatted = curDate.format(formatter)   //current date
 
         //check if map for a given day already downloaded, else download it
-        User.downloadUserData(mAuth, firestore) {userDataDownloaded()}
         getGeoJsonMap()
+        //updateDrawerHeader()    //updates header data
     }
 
     //runs after the user data is downloaded
     private fun userDataDownloaded() {
         updateUserData()
         getCoinsFromJson()
+        //updateDrawerHeader()
+    }
+
+    private fun updateDrawerHeader() {
+        header_username.text = User.getUsername()
+        header_gold.text = User.getGold().toInt().toString()
     }
 
     //check the date of the last downloaded map stored in shared preferences
@@ -495,6 +517,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_settings -> true
+            android.R.id.home -> {
+                drawer_layout.openDrawer(GravityCompat.START)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
