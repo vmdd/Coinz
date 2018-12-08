@@ -107,6 +107,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         recenter_fab.setOnClickListener {
             if(originLocation!=null)
                 setCameraPosition(originLocation!!) }
+
+        Log.d(tag,"[onCreate]: coins size: ${coins.size}")
+        Log.d(tag, "[onCreate]: mapJson $mapJson end")
     }
 
     //handling item selections from navigation menu
@@ -304,8 +307,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //called twice after user data finish downloading and after geoJson map is downloaded
     private fun getCoinsFromJson(){
         //check if both user data and geoJson map downloaded
-        if(User.getCollectedCoins() == null || mapJson == "")
+        Log.d(tag, "[getCoinsFromJson] cc size: ${User.getCollectedCoins()?.size} mapJson ${mapJson.length} end")
+        //check if resources ready or coins already set up
+        if(User.getCollectedCoins() == null || mapJson == "" || coins.size > 0)
             return
+
         val fc = FeatureCollection.fromJson(mapJson)
         if(fc.features() != null) {
             //reading coin attributes from Json and creating a Coin object
