@@ -116,6 +116,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_wallet -> {
                 startActivity(Intent(this, WalletActivity::class.java))
             }
+            R.id.nav_send_coins -> {
+                startActivity(Intent(this, SendCoinsActivity::class.java))
+            }
             R.id.nav_received_coins -> {
                 startActivity(Intent(this, ReceivedCoinsActivity::class.java))
             }

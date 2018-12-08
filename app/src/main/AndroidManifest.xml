@@ -40,6 +40,10 @@
             android:label="@string/wallet"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".SendCoinsActivity"
+            android:label="@string/send_coins"
+            android:parentActivityName=".MainActivity"/>
+        <activity
             android:name=".ReceivedCoinsActivity"
             android:label="@string/received_coins"
             android:parentActivityName=".MainActivity" />
@@ -50,7 +54,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
