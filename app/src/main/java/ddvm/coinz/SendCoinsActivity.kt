@@ -56,9 +56,7 @@ class SendCoinsActivity : AppCompatActivity() {
         }
     }
 
-
     private fun checkRecipientValid() {
-
         val recipientUsername = field_recipient.text.toString().toLowerCase()
         //check if the user tries to send coins to themselves
         if(User.getUsername().toLowerCase() == recipientUsername) {
@@ -66,23 +64,15 @@ class SendCoinsActivity : AppCompatActivity() {
             return
         }
         //check if user with given username exists
-        firestore?.collection("users")
-                ?.whereEqualTo("lowercase_username", recipientUsername)        //querying for documents with same username
-                ?.get()
-                ?.addOnSuccessListener { documents ->
-                    //if documents is empty then recipient with given username does not exist
-                    if(documents.isEmpty) {
-                        field_recipient.error = "Recipient does not exist"
-                        Log.d(tag, "[checkRecipientExists] $recipientUsername")
-                    } else {
-                        for(document in documents) {
-                            sendCoins(document.id)                     //recipient exists, send coins and pass recipients uid
-                        }
-                    }
-                }
-                ?.addOnFailureListener { e ->
-                    Log.d(tag, "[checkRecipientExists] error getting documents ", e)
-                }
+        Utils.checkUserExists(firestore,recipientUsername) { userExists, recipientDocument ->
+            if(userExists) {
+                for (document in recipientDocument!!)   //if user exists, then document exists as well
+                    sendCoins(document.id)      //send coin to recipient
+            } else {
+                field_recipient.error = "Recipient does not exist"
+                Log.d(tag, "[checkRecipientExists] $recipientUsername")
+            }
+        }
     }
 
     private fun sendCoins(recipientUid: String) {
@@ -105,10 +95,5 @@ class SendCoinsActivity : AppCompatActivity() {
             }
         }
         viewAdapter.clearItemsStates()
-    }
-
-    override fun onStop(){
-        super.onStop()
-        Log.d(tag, "[onStop][sendCoinsActivity]")
     }
 }

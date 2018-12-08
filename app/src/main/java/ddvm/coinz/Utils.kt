@@ -2,6 +2,8 @@ package ddvm.coinz
 
 import android.content.Context
 import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
@@ -62,6 +64,24 @@ object Utils {
     fun getAutocollectionState(context: Context): Boolean {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         return settings.getBoolean("autocollection",false)
+    }
+
+    fun checkUserExists(firestore: FirebaseFirestore?, username: String, checkComplete: (Boolean, QuerySnapshot?) -> Unit) {
+        firestore?.collection("users")
+                ?.whereEqualTo("lowercase_username", username.toLowerCase())        //querying for documents with same username
+                ?.get()
+                ?.addOnSuccessListener { documents ->
+                    //if documents is empty then user with given username does not exists
+                    if(documents.isEmpty) {
+                        checkComplete(false, null)
+                    } else {
+                        //user with given username exists
+                        checkComplete(true, documents)
+                    }
+                }
+                ?.addOnFailureListener { e ->
+                    Log.d(tag, "[checkUserExists] error getting documents ", e)
+                }
     }
 
     //select icon representing the coin currency and value

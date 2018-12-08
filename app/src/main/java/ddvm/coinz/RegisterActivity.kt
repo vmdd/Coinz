@@ -120,21 +120,15 @@ class RegisterActivity : AppCompatActivity(){
 
     //checks if username is available as usernames need to be unique case insensitive
     private fun checkUserNameAvailable() {
-        firestore?.collection("users")
-                ?.whereEqualTo("lowercase_username", username.toLowerCase())        //querying for documents with same username
-                ?.get()
-                ?.addOnSuccessListener { documents ->
-                    //if documents is empty then username is available
-                    if(documents.isEmpty) {
-                        register()
-                    } else {
-                        //username already taken by someone else
-                        fieldUserName.error = getString(R.string.username_not_available)
-                    }
-                }
-                ?.addOnFailureListener { e ->
-                    Log.d(tag, "[checkUserNameAvailable] error getting documents ", e)
-                }
+        Utils.checkUserExists(firestore,username) { userExists, _ ->
+            if(userExists) {
+                //username already taken by someone else
+                fieldUserName.error = getString(R.string.username_not_available)
+            } else {
+                register()  //register user with given data
+            }
+
+        }
     }
 
     //creates an user document using user's id and stores username and lowercase username for comparison purposes
