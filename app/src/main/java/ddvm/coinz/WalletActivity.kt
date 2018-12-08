@@ -122,7 +122,7 @@ class WalletActivity : AppCompatActivity() {
     }
 
     private fun removeCoin(position: Int) {
-        User.removeCoinFromWallet(firestore,position)
+        User.removeCoinFromCollection(firestore,"wallet",position)
         viewAdapter.notifyItemRemoved(position)
     }
 
@@ -165,8 +165,10 @@ class WalletActivity : AppCompatActivity() {
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
                 val coin = User.getWallet()[position]
+                val giftId = coin.id + User.getUsername()
+                val giftCoin = Coin(giftId, coin.value, coin.currency)
                 //store coin in recipient's collection, set document id as coin id and sender's username
-                firestoreRecipient?.document(coin.id + User.getUsername())?.set(coin)
+                firestoreRecipient?.document(coin.id + User.getUsername())?.set(giftCoin)
                 removeCoin(position)
             }
         }

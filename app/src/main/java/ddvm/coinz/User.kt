@@ -14,6 +14,7 @@ object User {
     private var nPaidInCoins: Int = 0
     private var userId: String? = null
     private val wallet = mutableListOf<Coin>()
+    private val receivedCoins = mutableListOf<Coin>()
 
     fun downloadUserData(mAuth: FirebaseAuth?, firestore: FirebaseFirestore?, completeListener: () -> Unit) {
         val mUser = mAuth?.currentUser
@@ -56,6 +57,25 @@ object User {
                 }
     }
 
+    fun downloadReceivedCoins(firestore: FirebaseFirestore?, completeListener: () -> Unit) {
+        receivedCoins.clear()
+        val firestoreReceived = firestore?.collection("users/$userId/received_coins")
+
+        firestoreReceived
+                ?.get()
+                ?.addOnSuccessListener {result ->
+                    for(document in result) {
+                        val coin = document.toObject(Coin::class.java)
+                        receivedCoins.add(coin)
+                    }
+                    completeListener()
+                }
+                ?.addOnFailureListener {exception ->
+                    Log.w(tag, "[fetchWallet] Error getting documents: ", exception)
+                }
+
+    }
+
     fun getUsername(): String {
         return if(username!=null)
             username!!
@@ -72,6 +92,8 @@ object User {
     fun getNPaidInCoins() = nPaidInCoins
 
     fun getWallet() = wallet
+
+    fun getReceivedCoins() = receivedCoins
 
     fun setLastPlayDate(firestore: FirebaseFirestore?, date: String) {
         lastPlayDate = date
@@ -113,12 +135,24 @@ object User {
                 ?.update("n_paid_in_coins", nPaidInCoins)
     }
 
-    fun removeCoinFromWallet(firestore: FirebaseFirestore?, position: Int) {
-        val coinId = wallet[position].id    //id of the selected coin
-        wallet.removeAt(position)
-        firestore?.document("users/${userId!!}/wallet/$coinId")
+    fun removeCoinFromCollection(firestore: FirebaseFirestore?, collection: String, position: Int) {
+        Log.d(tag,"[removeCoinsFromCollection] received_coins: ${receivedCoins.size}, position: $position")
+        var coinId = ""
+        when(collection){
+            "wallet" -> {
+                coinId = wallet[position].id
+                wallet.removeAt(position)
+            }
+            "received_coins" -> {
+                Log.d(tag, "[removeCoinsFromCollection] $receivedCoins")
+                coinId = receivedCoins[position].id
+                receivedCoins.removeAt(position)
+            }
+        }
+
+        firestore?.document("users/${userId!!}/$collection/$coinId")
                 ?.delete()
-                ?.addOnSuccessListener { Log.d(tag, "[removeCoinFromWallet] coin removed from database") }
-                ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromWallet] error deleting coin document", e) }
+                ?.addOnSuccessListener { Log.d(tag, "[removeCoinFromCollection] coin removed from database") }
+                ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromCollection] error deleting coin document", e) }
     }
 }
