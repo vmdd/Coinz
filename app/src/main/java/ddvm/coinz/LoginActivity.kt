@@ -37,6 +37,7 @@ class LoginActivity : AppCompatActivity(){
         go_to_register.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+        Log.d(tag, "[onCreate] called")
     }
 
     private fun signIn(email: String, password: String) {

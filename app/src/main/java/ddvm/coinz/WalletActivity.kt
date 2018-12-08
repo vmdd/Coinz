@@ -59,7 +59,6 @@ class WalletActivity : AppCompatActivity() {
                 toast.show()
             }
         }
-        Log.d(tag, "[onCreate][SendCoinsActivity]")
     }
 
     private fun discardSelectedCoins() {

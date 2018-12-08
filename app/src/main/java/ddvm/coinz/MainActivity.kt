@@ -467,11 +467,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onDestroy() {
         super.onDestroy()
         mapView?.onDestroy()
+        Log.d(tag, "[onDestroy] called")
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
         mapView?.onLowMemory()
+        Log.d(tag, "[onLowMemory] called")
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
