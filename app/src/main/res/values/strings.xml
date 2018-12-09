@@ -39,6 +39,11 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
 
+    <!-- shop strings -->
+    <string name="shop">Shop</string>
+    <string name="buy_item">Buy</string>
+    <string name="item_owned">Bought</string>
+
     <!-- send coins strings -->
     <string name="send_coins_activity_tag">SendCoinsActivity</string>
     <string name="prompt_recipient">Recipient\'s username</string>

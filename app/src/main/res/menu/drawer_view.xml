@@ -6,6 +6,9 @@
             android:icon="@drawable/ic_account_balance_wallet_black_24dp"
             android:title="@string/wallet" />
         <item
+            android:id="@+id/nav_shop"
+            android:title="@string/shop" />
+        <item
             android:id="@+id/nav_send_coins"
             android:icon="@drawable/send_coin"
             android:title="@string/send_coins" />

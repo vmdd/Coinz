@@ -21,8 +21,8 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTop"/>
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
@@ -42,9 +42,13 @@
             android:label="@string/wallet"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".ShopActivity"
+            android:label="@string/shop"
+            android:parentActivityName=".MainActivity" />
+        <activity
             android:name=".SendCoinsActivity"
             android:label="@string/send_coins"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ReceivedCoinsActivity"
             android:label="@string/received_coins"

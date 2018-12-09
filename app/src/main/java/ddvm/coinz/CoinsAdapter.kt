@@ -9,7 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_coin.view.*
 
-open class CoinsAdapter(private val context: Context, private val coins:MutableList<Coin>): RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
+open class CoinsAdapter(private val context: Context, private val coins:MutableList<Coin>):
+        RecyclerView.Adapter<CoinsAdapter.CoinViewHolder>() {
 
     private val itemStateArray = SparseBooleanArray()   //array storing position of selected coins
 

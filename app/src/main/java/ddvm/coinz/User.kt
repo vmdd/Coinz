@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 object User {
-    private val tag = "User"
+    private const val tag = "User"
     private var username: String = ""
     private var collectedCoins: MutableList<*>? = null
     private var gold: Double = 0.0
@@ -15,6 +15,7 @@ object User {
     private var userId: String? = null
     private val wallet = mutableListOf<Coin>()
     private val receivedCoins = mutableListOf<Coin>()
+    private var binoculars = false      //if user has binoculars
     private var walletCapacity = 10
     private var visionRange = 100
 
@@ -97,6 +98,8 @@ object User {
 
     fun getVisionRange() = visionRange
 
+    fun hasBinoculars() = binoculars
+
     fun setLastPlayDate(firestore: FirebaseFirestore?, date: String) {
         lastPlayDate = date
         firestore?.document("users/$userId")
@@ -152,9 +155,18 @@ object User {
             }
         }
 
-        firestore?.document("users/${userId!!}/$collection/$coinId")
+        firestore?.document("users/$userId/$collection/$coinId")
                 ?.delete()
                 ?.addOnSuccessListener { Log.d(tag, "[removeCoinFromCollection] coin removed from database") }
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromCollection] error deleting coin document", e) }
+    }
+
+    fun equipItem(firestore: FirebaseFirestore?, item: Item) {
+        if(item.addVisionRange!=0) {
+            visionRange += item.addVisionRange
+            binoculars = true
+        }
+        firestore?.document("users/$userId")
+                ?.update("binoculars", binoculars)
     }
 }
