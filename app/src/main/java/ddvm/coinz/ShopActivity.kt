@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlinx.android.synthetic.main.activity_shop.*
@@ -29,7 +30,12 @@ class ShopActivity : AppCompatActivity() {
         firestore?.firestoreSettings = settings
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = ItemsAdapter(this, items)
+        viewAdapter = ItemsAdapter(this, items) { item, position ->
+            //click listener for listening to "buy" button
+            item.equip(firestore)   //equip item
+            viewAdapter.notifyItemChanged(position) //update the data at the item's position
+            Toast.makeText(this, "Bought binoculars!", Toast.LENGTH_SHORT).show()
+        }
 
         items_recycler_view.apply {
             setHasFixedSize(true)

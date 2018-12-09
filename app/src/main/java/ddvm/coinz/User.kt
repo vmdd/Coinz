@@ -7,18 +7,20 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 object User {
     private const val tag = "User"
-    private var username: String = ""
-    private var collectedCoins: MutableList<*>? = null
-    private var gold: Double = 0.0
-    private var lastPlayDate: String? = null
-    private var nPaidInCoins: Int = 0
-    private var userId: String? = null
-    private val wallet = mutableListOf<Coin>()
-    private val receivedCoins = mutableListOf<Coin>()
-    private var binoculars = false      //if user has binoculars
-    private var walletCapacity = 10
-    private var visionRange = 100
 
+    private var username: String = ""                               //user's username chosen during registration
+    private var collectedCoins: MutableList<*>? = null              //id of coins collected by the user on last play date
+    private var gold: Double = 0.0                                  //user's gold amount
+    private var lastPlayDate: String? = null                        //last date the player played the game
+    private var nPaidInCoins: Int = 0                               //number of coins paid into the bank on the last play date
+    private var userId: String? = null                              //user id in firebase auth
+    private val wallet = mutableListOf<Coin>()                      //list of coins currently in user's wallet
+    private val receivedCoins = mutableListOf<Coin>()               //coins currently in user's receivedCoins account waiting for pay into the bank
+    private var binoculars = false                                  //if user bought and owns binoculars
+    private var walletCapacity = 10                                 //user's wallet capacity (max number of coins in the wallet)
+    private var visionRange = 100                                   //range in which user can see coins on the map
+
+    //downloads user's data from firestore
     fun downloadUserData(mAuth: FirebaseAuth?, firestore: FirebaseFirestore?, completeListener: () -> Unit) {
         val mUser = mAuth?.currentUser
         userId = mUser!!.uid
@@ -31,11 +33,19 @@ object User {
             collectedCoins = document.data?.get("collected_coins") as? MutableList<*>
             lastPlayDate = document.getString("last_play_date")
 
-            if(document.getDouble("gold")!= null)
+            if(document.getDouble("gold")!= null)   //get gold if field not null
                 gold = document.getDouble("gold")!!
 
-            if(document.getDouble("n_paid_in_coins")?.toInt()!=null)
+            if(document.getDouble("n_paid_in_coins")?.toInt()!=null)    //get nPaidInCoins if field not null
                 nPaidInCoins = document.getDouble("n_paid_in_coins")?.toInt()!!
+
+            //if the user has binoculars, increase his vision range
+            if(document.getBoolean("binoculars") == true) {
+                visionRange += Binoculars().additionalVisionRange
+                binoculars = true   //note that user already has binoculars
+            }
+
+
 
             //download user wallet
             downloadUserWallet(firestore, completeListener)
@@ -61,6 +71,7 @@ object User {
                 }
     }
 
+    //downloads coins in user's received coins collection from firestore
     fun downloadReceivedCoins(firestore: FirebaseFirestore?, completeListener: () -> Unit) {
         receivedCoins.clear()
         val firestoreReceived = firestore?.collection("users/$userId/received_coins")
@@ -72,7 +83,7 @@ object User {
                         val coin = document.toObject(Coin::class.java)
                         receivedCoins.add(coin)
                     }
-                    completeListener()
+                    completeListener()  //download successfully completed, call completeListener passed by the caller
                 }
                 ?.addOnFailureListener {exception ->
                     Log.w(tag, "[fetchWallet] Error getting documents: ", exception)
@@ -100,18 +111,21 @@ object User {
 
     fun hasBinoculars() = binoculars
 
+    //sets the lastplay date and updates firestore
     fun setLastPlayDate(firestore: FirebaseFirestore?, date: String) {
         lastPlayDate = date
         firestore?.document("users/$userId")
                 ?.update("last_play_date", date)
     }
 
+    //clears list of collected coins and updates firestore
     fun clearCollectedCoins(firestore: FirebaseFirestore?) {
         collectedCoins = mutableListOf<String>()
         firestore?.document("users/$userId")
                 ?.update("collected_coins", collectedCoins)
     }
 
+    //adds collected coin to the wallet and adds it's id to collected_coins in firestore
     fun addCollectedCoin(firestore: FirebaseFirestore?, coin:Coin) {
         val firestoreWallet = firestore?.collection("users/${userId!!}/wallet")
         firestoreWallet?.document(coin.id)?.set(coin)       //storing collected coins in wallet in firestore
@@ -122,24 +136,28 @@ object User {
 
     }
 
+    //sets nPaidInCoins to 0 and updates firestore document
     fun clearNPaidInCoins(firestore: FirebaseFirestore?){
         nPaidInCoins = 0
         firestore?.document("users/$userId")
                 ?.update("n_paid_in_coins", nPaidInCoins)
     }
 
+    //adds amount of gold to user's gold and updates firestore
     fun addGold(firestore: FirebaseFirestore?, goldAmount:Double) {
         gold += goldAmount
         firestore?.document("users/$userId")
                 ?.update("gold", gold)
     }
 
+    //add the number of coins paid in to nPaidInCoins and updates firestore
     fun addPaidInCoins(firestore: FirebaseFirestore?, nPaidCoins: Int) {
         nPaidInCoins += nPaidCoins
         firestore?.document("users/$userId")
                 ?.update("n_paid_in_coins", nPaidInCoins)
     }
 
+    //removes coin from specified collection (wallet/received_coins) and updates firestore
     fun removeCoinFromCollection(firestore: FirebaseFirestore?, collection: String, position: Int) {
         Log.d(tag,"[removeCoinsFromCollection] received_coins: ${receivedCoins.size}, position: $position")
         var coinId = ""
@@ -161,9 +179,10 @@ object User {
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromCollection] error deleting coin document", e) }
     }
 
+    //updates user's stats with given item bonuses
     fun equipItem(firestore: FirebaseFirestore?, item: Item) {
-        if(item.addVisionRange!=0) {
-            visionRange += item.addVisionRange
+        if(item.additionalVisionRange!=0) {
+            visionRange += item.additionalVisionRange
             binoculars = true
         }
         firestore?.document("users/$userId")
