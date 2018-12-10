@@ -1,6 +1,5 @@
 package ddvm.coinz
 
-import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -18,7 +17,7 @@ class WalletActivity : AppCompatActivity() {
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
 
-    private lateinit var userLastLocation: Location             //last location passed from MainActivity
+    private lateinit var userLastLocation: LatLng            //last location passed from MainActivity
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -53,7 +52,7 @@ class WalletActivity : AppCompatActivity() {
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
             when {
-                !checkPayInRange() -> Toast.makeText(this, getString(R.string.not_in_bank),
+                !Bank.userNearPlace(userLastLocation) -> Toast.makeText(this, getString(R.string.not_in_bank),
                         Toast.LENGTH_SHORT).show()
                 !checkPayInLimit() -> Toast.makeText(this, getString(R.string.limit_exhausted),
                         Toast.LENGTH_SHORT).show()
@@ -109,12 +108,6 @@ class WalletActivity : AppCompatActivity() {
         }
 
         viewAdapter.clearItemsStates()
-    }
-
-    private fun checkPayInRange(): Boolean {
-        val latLng = LatLng(userLastLocation.latitude, userLastLocation.longitude)
-        //check if in range of the bank (same as collection range
-        return latLng.distanceTo(Bank().coordinates) <= MainActivity.collectRange
     }
 
     //check if the limit allows the user to pay in selected coins

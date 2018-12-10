@@ -1,6 +1,5 @@
 package ddvm.coinz
 
-import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -19,7 +18,7 @@ class SendCoinsActivity : AppCompatActivity() {
 
     private var firestore: FirebaseFirestore? = null
 
-    private lateinit var userLastLocation: Location
+    private lateinit var userLastLocation: LatLng
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -54,7 +53,7 @@ class SendCoinsActivity : AppCompatActivity() {
         send_coins_button.setOnClickListener {
             when {
                 //must be in bank to send coins
-                !checkSendCoinsRange() -> Toast.makeText(this,
+                !Bank.userNearPlace(userLastLocation) -> Toast.makeText(this,
                         getString(R.string.not_in_bank_for_send_coins), Toast.LENGTH_SHORT).show()
                 //no spare change to send (daily limit of paid in coins not exhausted)
                 User.getNPaidInCoins()<25 -> Toast.makeText(this,
@@ -81,12 +80,6 @@ class SendCoinsActivity : AppCompatActivity() {
                 Log.d(tag, "[checkRecipientExists] $recipientUsername")
             }
         }
-    }
-
-    private fun checkSendCoinsRange(): Boolean {
-        val latLng = LatLng(userLastLocation.latitude, userLastLocation.longitude)
-        //check if in range of the bank (same as collection range
-        return latLng.distanceTo(Bank().coordinates) <= MainActivity.collectRange
     }
 
     private fun sendCoins(recipientUid: String, recipientUsername: String) {

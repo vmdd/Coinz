@@ -1,6 +1,5 @@
 package ddvm.coinz
 
-import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -17,7 +16,7 @@ class ShopActivity : AppCompatActivity() {
 
     private var firestore: FirebaseFirestore? = null
 
-    private lateinit var userLastLocation: Location
+    private lateinit var userLastLocation: LatLng
 
     private lateinit var viewAdapter: ItemsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -41,7 +40,7 @@ class ShopActivity : AppCompatActivity() {
             //click listener for listening to "buy" button
             when {
                 //not in the shop
-                !checkInShopRange() -> Toast.makeText(this,
+                !Shop.userNearPlace(userLastLocation) -> Toast.makeText(this,
                         getString(R.string.not_in_shop),
                         Toast.LENGTH_SHORT).show()
                 //not enough gold to buy item
@@ -65,13 +64,6 @@ class ShopActivity : AppCompatActivity() {
 
             adapter = viewAdapter
         }
-    }
-
-    //check if the user is in the shop
-    private fun checkInShopRange(): Boolean {
-        val latLng = LatLng(userLastLocation.latitude, userLastLocation.longitude)
-        //check if in range of the bank (same as collection range
-        return latLng.distanceTo(Shop().coordinates) <= MainActivity.collectRange
     }
 
     private fun checkEnoughGold(item:Item): Boolean {

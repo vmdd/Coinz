@@ -1,6 +1,7 @@
 package ddvm.coinz
 
 import android.content.Intent
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -69,9 +70,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private var autocollection = false
-    private val places = listOf(Bank(), Shop())        //list of special places on the map
+    private val places = listOf(Bank, Shop, Tower)        //list of special places on the map
 
     private var originLocation: Location? = null
+    private var originLatLng: LatLng? = null
     private lateinit var permissionsManager: PermissionsManager
     private var locationEngine: LocationEngine? = null
     private lateinit var locationLayerPlugin: LocationLayerPlugin
@@ -123,7 +125,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         recenter_fab.setOnClickListener {
             if(originLocation!=null)
-                setCameraPosition(originLocation!!) }
+                setCameraPosition(originLatLng!!) }
 
         //download user data from firestore
         User.downloadUserData(mAuth, firestore) {userDataDownloaded()}
@@ -135,8 +137,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //updates the data in the header
     private fun updateDrawerHeader() {
         header_username.text = User.getUsername()
-        header_gold.text = Utils.formatGold(User.getGold())         //display formatted gold
-        header_vision_range.text = User.getVisionRange().toString()
+        header_gold.text = Utils.formatGold(User.getGold())             //display formatted gold
+
+        //display vision range and check if vision is amplified by the tower
+        //if vision amplified set text color to green
+        if(originLatLng!=null) {
+            val towerBuff = towerBuff(originLatLng!!)
+            val range = (User.getVisionRange()*towerBuff).toInt()
+            header_vision_range.text = range.toString() + 'm'
+            if(towerBuff > 1)
+                header_vision_range.setTextColor(Color.GREEN)
+        } else {
+            header_vision_range.text = User.getVisionRange().toString() + 'm'
+        }
 
         val nCoins = User.getWallet().size  //number of coins in wallet
         val maxCapacity = User.getWalletCapacity()
@@ -150,15 +163,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_wallet -> {
                 //start activity and pass the current location
                 startActivity(Intent(this, WalletActivity::class.java)
-                        .putExtra(EXTRA_LOCATION, originLocation))
+                        .putExtra(EXTRA_LOCATION, originLatLng))
             }
             R.id.nav_shop -> {
                 startActivity(Intent(this, ShopActivity::class.java)
-                        .putExtra(EXTRA_LOCATION, originLocation))
+                        .putExtra(EXTRA_LOCATION, originLatLng))
             }
             R.id.nav_send_coins -> {
                 startActivity(Intent(this, SendCoinsActivity::class.java)
-                        .putExtra(EXTRA_LOCATION, originLocation))
+                        .putExtra(EXTRA_LOCATION, originLatLng))
             }
             R.id.nav_received_coins -> {
                 startActivity(Intent(this, ReceivedCoinsActivity::class.java))
@@ -195,9 +208,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             addPlacesMarkers()
 
             map?.setOnMarkerClickListener {marker ->
-                if(originLocation!=null) {
-                    val latLng = LatLng(originLocation!!.latitude, originLocation!!.longitude)
-                    val distance = marker.position.distanceTo(latLng)       //distance from the user to the coin
+                if(originLatLng!=null) {
+                    val distance = marker.position.distanceTo(originLatLng)       //distance from the user to the coin
                     if (distance <= collectRange) {
                         if(checkSpaceInWallet()) {
                             collectCoin(marker.title)
@@ -240,7 +252,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val lastLocation = locationEngine?.lastLocation
         if(lastLocation != null){
             originLocation = lastLocation
-            setCameraPosition(lastLocation)
+            originLatLng= LatLng(lastLocation.latitude, lastLocation.longitude)
+            setCameraPosition(originLatLng!!)
         }else{
             locationEngine?.addLocationEngineListener(this)
         }
@@ -248,9 +261,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         displayInitialCoins()   //display coins if mapbox map and coin list available
     }
 
-    private fun setCameraPosition(location: Location) {
-        val latlng = LatLng(location.latitude, location.longitude)
-        map?.animateCamera(CameraUpdateFactory.newLatLng(latlng))
+    private fun setCameraPosition(location: LatLng) {
+        map?.animateCamera(CameraUpdateFactory.newLatLng(location))
     }
 
     private fun initialiseLocationLayer() {
@@ -276,12 +288,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             Log.d(tag, "[onLocationChanged] location is null")
         }else{
             originLocation = location
-            setCameraPosition(originLocation!!)
+            originLatLng = LatLng(location.latitude, location.longitude)
+            setCameraPosition(originLatLng!!)
             //check if the map is ready and coins are downloaded. If there are no coins, then nothing to do either
             if(map != null && coins.size > 0) {
-                displayCoinsInVisionRange(location)
+                displayCoinsInVisionRange(originLatLng!!)
                 if(autocollection)  //check if autocollection enabled and there is space in the wallet
-                    collectCoinsInRange(location)       //collect coins automatically when user in range
+                    collectCoinsInRange(originLatLng!!)       //collect coins automatically when user in range
             }
         }
     }
@@ -401,16 +414,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //when map and coins are downloaded and location determined
     private fun displayInitialCoins() {
         if(originLocation!=null && coins.size>0) {
-            displayCoinsInVisionRange(originLocation!!)
+            displayCoinsInVisionRange(originLatLng!!)
         }
         Log.d(tag, "[displayInitialCoins] map $map, location: $originLocation, coins: ${coins.size}")
     }
 
-    private fun displayCoinsInVisionRange(location: Location) {
-        val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
+    private fun displayCoinsInVisionRange(location: LatLng) {
+        val towerMultiplier = towerBuff(location)                 //check if tower buff applies
         for(coin in coins) {
             val markerId = coinsMarkersMap[coin.id]
-            if(coin.inRange(latLng, User.getVisionRange())) {
+            val range = (User.getVisionRange() * towerMultiplier).toInt()
+            if(coin.inRange(location, range)) {
                 if(markerId == null)
                     drawMarker(coin)
             } else {
@@ -418,6 +432,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                     removeMarker(coin)
                 }
             }
+        }
+    }
+
+    //check if user in the Tower, if yes then returns the vision multiplier (x2)
+    private fun towerBuff(location: LatLng): Double {
+        return if(Tower.userNearPlace(location)) {
+            Tower.visionAmplifier
+        } else {
+            1.0
         }
     }
 
@@ -468,13 +491,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     //detecting coins in range for automatic collection
-    private fun collectCoinsInRange(location: Location){
-        val latLng = LatLng(location.latitude, location.longitude)  //latlng of user location
+    private fun collectCoinsInRange(location: LatLng){
         val coinsIterator = coins.iterator()
         for(coin in coinsIterator) {
             if(!checkSpaceInWallet())   //wallet full cant collect more coins
                 break
-            if (coin.inRange(latLng, collectRange)) {
+            if (coin.inRange(location, collectRange)) {
                 User.addCollectedCoin(firestore, coin)
                 removeMarker(coin)
                 coinsIterator.remove()
