@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
     private var autocollection = false
-    private val places = listOf(Bank())        //list of special places on the map
+    private val places = listOf(Bank(), Shop())        //list of special places on the map
 
     private var originLocation: Location? = null
     private lateinit var permissionsManager: PermissionsManager
@@ -153,7 +153,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                         .putExtra(EXTRA_LOCATION, originLocation))
             }
             R.id.nav_shop -> {
-                startActivity(Intent(this, ShopActivity::class.java))
+                startActivity(Intent(this, ShopActivity::class.java)
+                        .putExtra(EXTRA_LOCATION, originLocation))
             }
             R.id.nav_send_coins -> {
                 startActivity(Intent(this, SendCoinsActivity::class.java)

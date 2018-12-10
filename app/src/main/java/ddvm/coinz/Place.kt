@@ -14,3 +14,10 @@ class Bank: Place() {
     override val coordinates = LatLng(55.945935, -3.188312)
     override val placeMarkerResource = R.drawable.bank
 }
+
+//Sainsbury's near campus
+class Shop: Place() {
+    override val placeName = "Shop"
+    override val coordinates = LatLng(55.943891, -3.191785)
+    override val placeMarkerResource = R.drawable.shop
+}
