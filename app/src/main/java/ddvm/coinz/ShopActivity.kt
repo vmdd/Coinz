@@ -16,7 +16,7 @@ class ShopActivity : AppCompatActivity() {
 
     private var firestore: FirebaseFirestore? = null
 
-    private lateinit var userLastLocation: LatLng
+    private var userLastLocation: LatLng? = null
 
     private lateinit var viewAdapter: ItemsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -39,8 +39,10 @@ class ShopActivity : AppCompatActivity() {
         viewAdapter = ItemsAdapter(this, items) { item, position ->
             //click listener for listening to "buy" button
             when {
+                userLastLocation == null -> Toast.makeText(this,
+                        getString(R.string.no_location), Toast.LENGTH_SHORT).show()
                 //not in the shop
-                !Shop.userNearPlace(userLastLocation) -> Toast.makeText(this,
+                !Shop.userNearPlace(userLastLocation!!) -> Toast.makeText(this,
                         getString(R.string.not_in_shop),
                         Toast.LENGTH_SHORT).show()
                 //not enough gold to buy item

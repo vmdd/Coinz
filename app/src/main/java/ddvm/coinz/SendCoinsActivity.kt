@@ -18,7 +18,7 @@ class SendCoinsActivity : AppCompatActivity() {
 
     private var firestore: FirebaseFirestore? = null
 
-    private lateinit var userLastLocation: LatLng
+    private var userLastLocation: LatLng? = null
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -52,8 +52,9 @@ class SendCoinsActivity : AppCompatActivity() {
 
         send_coins_button.setOnClickListener {
             when {
+                userLastLocation == null -> Toast.makeText(this, getString(R.string.no_location), Toast.LENGTH_SHORT).show()
                 //must be in bank to send coins
-                !Bank.userNearPlace(userLastLocation) -> Toast.makeText(this,
+                !Bank.userNearPlace(userLastLocation!!) -> Toast.makeText(this,
                         getString(R.string.not_in_bank_for_send_coins), Toast.LENGTH_SHORT).show()
                 //no spare change to send (daily limit of paid in coins not exhausted)
                 User.getNPaidInCoins()<25 -> Toast.makeText(this,

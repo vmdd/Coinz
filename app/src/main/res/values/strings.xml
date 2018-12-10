@@ -28,6 +28,7 @@
 
     <!-- main activity strings -->
     <string name="wallet_full">No space in the wallet!</string>
+    <string name="distance_to_object">Distance to object: </string>
 
     <!-- wallet strings -->
     <string name="wallet">Wallet</string>
@@ -72,4 +73,7 @@
     <string name="prompt_new_username">New username</string>
     <string name="prompt_choose_new_name">Please choose your new username</string>
     <string name="change_username">Change username</string>
+
+    <!-- location strings -->
+    <string name="no_location">Location unavailable. Please enable location</string>
 </resources>

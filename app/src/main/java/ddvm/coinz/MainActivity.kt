@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
@@ -124,7 +125,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         )
 
         recenter_fab.setOnClickListener {
-            if(originLocation!=null)
+            if(originLatLng!=null)
                 setCameraPosition(originLatLng!!) }
 
         //download user data from firestore
@@ -141,15 +142,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         //display vision range and check if vision is amplified by the tower
         //if vision amplified set text color to green
-        if(originLatLng!=null) {
-            val towerBuff = towerBuff(originLatLng!!)
-            val range = (User.getVisionRange()*towerBuff).toInt()
-            header_vision_range.text = range.toString() + 'm'
-            if(towerBuff > 1)
-                header_vision_range.setTextColor(Color.GREEN)
-        } else {
-            header_vision_range.text = User.getVisionRange().toString() + 'm'
-        }
+        val towerBuff = towerBuff(originLatLng)
+        val range = (User.getVisionRange()*towerBuff).toInt()
+        header_vision_range.text = range.toString() + 'm'
+        if(towerBuff > 1)
+            header_vision_range.setTextColor(Color.GREEN)
+        else
+            header_vision_range.setTextColor(ContextCompat.getColor(this, //default color
+                    android.R.color.tab_indicator_text))
+
 
         val nCoins = User.getWallet().size  //number of coins in wallet
         val maxCapacity = User.getWalletCapacity()
@@ -219,7 +220,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                         }
                     } else {
                         Toast.makeText(this,
-                                "Distance to coin: ${distance.roundToInt()}m",
+                                 getString(R.string.distance_to_object) + "${distance.roundToInt()}m",
                                 Toast.LENGTH_SHORT)
                                 .show()
                     }
@@ -436,11 +437,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     //check if user in the Tower, if yes then returns the vision multiplier (x2)
-    private fun towerBuff(location: LatLng): Double {
-        return if(Tower.userNearPlace(location)) {
-            Tower.visionAmplifier
-        } else {
-            1.0
+    private fun towerBuff(location: LatLng?): Double {
+        return when {
+            location == null -> 1.0
+            Tower.userNearPlace(location) -> Tower.visionAmplifier
+            else -> 1.0
         }
     }
 

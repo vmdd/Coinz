@@ -17,7 +17,7 @@ class WalletActivity : AppCompatActivity() {
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
 
-    private lateinit var userLastLocation: LatLng            //last location passed from MainActivity
+    private var userLastLocation: LatLng? = null           //last location passed from MainActivity
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -52,7 +52,9 @@ class WalletActivity : AppCompatActivity() {
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
             when {
-                !Bank.userNearPlace(userLastLocation) -> Toast.makeText(this, getString(R.string.not_in_bank),
+                userLastLocation == null -> Toast.makeText(this,
+                        getString(R.string.no_location), Toast.LENGTH_SHORT).show()
+                !Bank.userNearPlace(userLastLocation!!) -> Toast.makeText(this, getString(R.string.not_in_bank),
                         Toast.LENGTH_SHORT).show()
                 !checkPayInLimit() -> Toast.makeText(this, getString(R.string.limit_exhausted),
                         Toast.LENGTH_SHORT).show()
