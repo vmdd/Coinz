@@ -1,25 +1,24 @@
 package ddvm.coinz
 
+import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
+import com.mapbox.mapboxsdk.geometry.LatLng
 
 import kotlinx.android.synthetic.main.activity_wallet.*
 
 class WalletActivity : AppCompatActivity() {
 
-    private var tag = "WalletActivity"
-
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var firestore: FirebaseFirestore? = null
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
+
+    private lateinit var userLastLocation: Location
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -28,6 +27,8 @@ class WalletActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
+
+        userLastLocation = intent.getParcelableExtra(MainActivity.EXTRA_LOCATION)
 
         //cloud firestore
         firestore = FirebaseFirestore.getInstance()
@@ -50,13 +51,12 @@ class WalletActivity : AppCompatActivity() {
 
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
-            if(checkPayInLimit())
-                storeCoinsInBank()
-            else {
-                val toast = Toast.makeText(this,
-                        "You can only pay in ${dailyLimit - User.getNPaidInCoins()} coin(s) more",
-                        Toast.LENGTH_SHORT)
-                toast.show()
+            when {
+                !checkPayInRange() -> Toast.makeText(this, getString(R.string.not_in_bank),
+                        Toast.LENGTH_SHORT).show()
+                !checkPayInLimit() -> Toast.makeText(this, getString(R.string.limit_exhausted),
+                        Toast.LENGTH_SHORT).show()
+                else -> storeCoinsInBank()
             }
         }
     }
@@ -93,10 +93,24 @@ class WalletActivity : AppCompatActivity() {
                 viewAdapter.notifyItemRemoved(position)
             }
         }
-        User.addGold(firestore, gold)                   //update user's gold after transaction
-        User.addPaidInCoins(firestore, nStoredCoins)    //update the number of stored coins in the bank today
+
+        if(nStoredCoins == 0) {
+            Toast.makeText(this, getString(R.string.no_coins_to_pay_in_selected),
+                    Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, getString(R.string.transaction_successful), Toast.LENGTH_SHORT).show()
+            User.addGold(firestore, gold)                   //update user's gold after transaction
+            User.addPaidInCoins(firestore, nStoredCoins)    //update the number of stored coins in the bank today
+
+        }
 
         viewAdapter.clearItemsStates()
+    }
+
+    private fun checkPayInRange(): Boolean {
+        val latLng = LatLng(userLastLocation.latitude, userLastLocation.longitude)
+        //check if in range of the bank (same as collection range
+        return latLng.distanceTo(Bank().coordinates) <= MainActivity.collectRange
     }
 
     //check if the limit allows the user to pay in selected coins
@@ -108,6 +122,7 @@ class WalletActivity : AppCompatActivity() {
                 nCoinsToPayIn++
         }
 
+        //check if the transaction is within the daily limit
         return (dailyLimit - User.getNPaidInCoins() - nCoinsToPayIn >= 0)
     }
 

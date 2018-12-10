@@ -68,13 +68,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private val coins = mutableListOf<Coin>()  //list storing coins available for collection on the map
     private val coinsMarkersMap = mutableMapOf<String, Long>()  //map matching coins id with their marker's id
 
-    private val collectRange: Int = 25         //range to collect coin in meters
     private var autocollection = false
+    private val places = listOf(Bank())        //list of special places on the map
 
     private var originLocation: Location? = null
     private lateinit var permissionsManager: PermissionsManager
     private var locationEngine: LocationEngine? = null
     private lateinit var locationLayerPlugin: LocationLayerPlugin
+
+    companion object {
+        const val EXTRA_LOCATION = "userLastLocation"
+        const val collectRange = 25  //range to collect coin in meters
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -143,7 +148,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_wallet -> {
-                startActivity(Intent(this, WalletActivity::class.java))
+                //start activity and pass the current location
+                startActivity(Intent(this, WalletActivity::class.java)
+                        .putExtra(EXTRA_LOCATION, originLocation))
             }
             R.id.nav_shop -> {
                 startActivity(Intent(this, ShopActivity::class.java))
@@ -182,6 +189,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
             //make location information available
             enableLocation()
+            //add markers of important places
+            addPlacesMarkers()
 
             map?.setOnMarkerClickListener {marker ->
                 if(originLocation!=null) {
@@ -272,6 +281,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 displayCoinsInVisionRange(location)
                 if(autocollection)  //check if autocollection enabled and there is space in the wallet
                     collectCoinsInRange(location)       //collect coins automatically when user in range
+            }
+        }
+    }
+
+    //adds markers of the Bank, Shop, Appleton Tower
+    private fun addPlacesMarkers() {
+        for(place in places) {
+            val icon: Icon = IconFactory.getInstance(this).fromResource(place.placeMarkerResource) //icon of the marker
+            //add marker to the map
+            val marker = map?.addMarker(MarkerOptions()
+                    .position(place.coordinates)
+                    .title(place.placeName)
+                    .icon(icon))
+
+            if(marker == null) {
+                Log.d(tag, "[addPlacesMarkers] marker is null")
             }
         }
     }

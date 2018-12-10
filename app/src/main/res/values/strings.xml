@@ -38,6 +38,10 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="not_in_bank">Go to the bank to pay in coins</string>
+    <string name="limit_exhausted">You have exhausted your pay in limit for today</string>
+    <string name="no_coins_to_pay_in_selected">Please select coins to pay into your bank account</string>
+    <string name="transaction_successful">Transaction successful!</string>
 
     <!-- shop strings -->
     <string name="shop">Shop</string>
