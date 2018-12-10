@@ -2,6 +2,7 @@ package ddvm.coinz
 
 import com.mapbox.mapboxsdk.geometry.LatLng
 
+//class for special places on the map
 abstract class Place {
     abstract val placeName: String
     abstract val coordinates: LatLng

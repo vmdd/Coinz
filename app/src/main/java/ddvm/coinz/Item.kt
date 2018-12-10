@@ -2,6 +2,7 @@ package ddvm.coinz
 
 import com.google.firebase.firestore.FirebaseFirestore
 
+//items modifying user's statistics
 abstract class Item {
     abstract val itemName: String
     abstract val itemDescription: String
@@ -16,6 +17,7 @@ abstract class Item {
     }
 }
 
+//item increases user's vision range
 class Binoculars: Item() {
     override val itemName = "Binoculars"
     override val itemDescription = "Increases vision range by 50m"
@@ -29,6 +31,7 @@ class Binoculars: Item() {
     }
 }
 
+//item increases user's wallet capacity
 class Bag: Item() {
     override val itemName = "Bag"
     override val itemDescription = "Increases wallet capacity by 15 coins"

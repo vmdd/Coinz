@@ -6,27 +6,36 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="@dimen/activity_horizontal_margin"
-    android:paddingEnd="@dimen/activity_horizontal_margin">   <!-- each item has only enough space to display information -->
+    android:paddingEnd="@dimen/activity_horizontal_margin"
+    android:paddingTop="8dp">   <!-- each item has only enough space to display information -->
 
     <!-- text view for position of the user on the leaderboard -->
     <TextView
         android:id="@+id/position"
-        android:layout_width="1dp"
+        android:layout_width="42dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.5" />
+        android:layout_weight="0"
+        android:gravity="center"
+        android:textSize="24sp" />
 
     <!-- text view for user's username -->
     <TextView
         android:id="@+id/username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="2" />
+        android:layout_weight="1"
+        android:textSize="24sp"
+        android:gravity="center"/>
 
     <!-- amount of gold the user has -->
     <TextView
         android:id="@+id/user_gold"
-        android:layout_width="0dp"
+        android:layout_width="88dp"
         android:layout_height="wrap_content"
-        android:layout_weight="2" />
+        android:layout_weight="0"
+        android:drawableEnd="@drawable/gold"
+        android:drawablePadding="8dp"
+        android:gravity="end"
+        android:textSize="24sp" />
 
 </LinearLayout>

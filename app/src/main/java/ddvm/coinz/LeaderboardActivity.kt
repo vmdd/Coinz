@@ -19,7 +19,7 @@ class LeaderboardActivity : AppCompatActivity() {
     private var firestore: FirebaseFirestore? = null
     private var firestoreUsers: CollectionReference? = null     //reference to collection with all users documents
 
-    private val leaderboardList = mutableListOf<Pair<String,Int>>()
+    private val leaderboardList = mutableListOf<Pair<String,Double>>()
 
     private lateinit var viewAdapter: LeaderboardAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -37,7 +37,7 @@ class LeaderboardActivity : AppCompatActivity() {
         firestoreUsers = firestore?.collection("users")
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = LeaderboardAdapter(leaderboardList)
+        viewAdapter = LeaderboardAdapter(this, leaderboardList)
 
         leaderboard_recycler_view.apply {
             setHasFixedSize(true)
@@ -58,7 +58,7 @@ class LeaderboardActivity : AppCompatActivity() {
                 ?.addOnSuccessListener { documents ->
                     for(document in documents) {
                         val username = document.getString("username")
-                        val gold = document.getDouble("gold")?.roundToInt()
+                        val gold = document.getDouble("gold")
                         if(username != null && gold != null)
                             leaderboardList.add(Pair(username,gold))
                         viewAdapter.notifyItemInserted(leaderboardList.size - 1)  //updates the recycler view with new user entry
