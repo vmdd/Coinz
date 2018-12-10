@@ -17,6 +17,7 @@ object User {
     private val wallet = mutableListOf<Coin>()                      //list of coins currently in user's wallet
     private val receivedCoins = mutableListOf<Coin>()               //coins currently in user's receivedCoins account waiting for pay into the bank
     private var binoculars = false                                  //if user bought and owns binoculars
+    private var bag = false
     private var walletCapacity = 10                                 //user's wallet capacity (max number of coins in the wallet)
     private var visionRange = 100                                   //range in which user can see coins on the map
 
@@ -109,7 +110,13 @@ object User {
 
     fun getVisionRange() = visionRange
 
-    fun hasBinoculars() = binoculars
+    fun hasItem(itemName: String): Boolean {
+        return when(itemName) {
+            "Binoculars" -> binoculars
+            "Bag" -> bag
+            else -> false
+        }
+    }
 
     //sets the lastplay date and updates firestore
     fun setLastPlayDate(firestore: FirebaseFirestore?, date: String) {
@@ -179,14 +186,14 @@ object User {
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromCollection] error deleting coin document", e) }
     }
 
-    //notes that user has given item and updates the stats
-    fun buyItem(firestore: FirebaseFirestore?, item: Item) {
-        if(item is Binoculars) {
-            visionRange += item.additionalVisionRange
-            binoculars = true
-            firestore?.document("users/$userId")
-                    ?.update("binoculars", binoculars)
-        }
+    fun setBinoculars(firestore:FirebaseFirestore?, value: Boolean) {
+        binoculars = value
+        firestore?.document("users/$userId")
+                ?.update("binoculars", binoculars)
+    }
+
+    fun increaseVisionRange(range:Int) {
+        visionRange += range
     }
 
     fun decreaseGold(firestore: FirebaseFirestore?,goldAmount: Double) {

@@ -32,25 +32,20 @@ class ItemsAdapter(private val context: Context, private val items: List<Item>,
         fun bind(item: Item) {
             view.item_name.text = item.itemName
             view.item_description.text = item.itemDescription
-
-            //check the type of the item
-            if(item is Binoculars) {
-                    //set the icon for binoculars
-                    view.item_icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_binoculars))
-
-                    //check if user has binoculars
-                    if(User.hasBinoculars()) {
-                        //user already has binoculars, set button text to "bought" and diable the button
-                        view.buy_item.text = context.getString(R.string.item_owned)
-                        view.buy_item.isEnabled = false
-                    } else {
-                        //set the button text to "buy" and set the click listener
-                        val goldIcon = ContextCompat.getDrawable(context, R.drawable.gold)
-                        view.buy_item.setCompoundDrawablesWithIntrinsicBounds(goldIcon, null, null, null)
-                        view.buy_item.text = Utils.formatGold(item.price.toDouble())
-                        view.buy_item.setOnClickListener {clickListener(item, adapterPosition)}
-                    }
+            view.item_icon.setImageDrawable(ContextCompat.getDrawable(context, item.iconResource))
+            //check if user already has given item
+            if(User.hasItem(item.itemName)) {
+                //user already has binoculars, set button text to "bought" and diable the button
+                view.buy_item.text = context.getString(R.string.item_owned)
+                view.buy_item.isEnabled = false
+            } else {
+                //set the button text to "buy" and set the click listener
+                val goldIcon = ContextCompat.getDrawable(context, R.drawable.gold)
+                view.buy_item.setCompoundDrawablesWithIntrinsicBounds(goldIcon, null, null, null)
+                view.buy_item.text = Utils.formatGold(item.price)
+                view.buy_item.setOnClickListener {clickListener(item, adapterPosition)}
             }
+
 
         }
     }
