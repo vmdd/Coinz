@@ -46,6 +46,11 @@ object User {
                 binoculars = true   //note that user already has binoculars
             }
 
+            if(document.getBoolean("bag") == true) {
+                walletCapacity += Bag().additionalWalletCapacity
+                bag = true
+            }
+
 
 
             //download user wallet
@@ -192,8 +197,18 @@ object User {
                 ?.update("binoculars", binoculars)
     }
 
-    fun increaseVisionRange(range:Int) {
+    fun setBag(firestore: FirebaseFirestore?, value: Boolean) {
+        bag = value
+        firestore?.document("users/$userId")
+                ?.update("bag", bag)
+    }
+
+    fun increaseVisionRange(range: Int) {
         visionRange += range
+    }
+
+    fun increaseWalletCapacity(capacity: Int) {
+        walletCapacity += capacity
     }
 
     fun decreaseGold(firestore: FirebaseFirestore?,goldAmount: Double) {

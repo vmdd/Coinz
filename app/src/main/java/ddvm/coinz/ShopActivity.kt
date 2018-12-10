@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.activity_shop.*
 
 class ShopActivity : AppCompatActivity() {
 
-    private var items = listOf(Binoculars())
+    private var items = listOf(Binoculars(), Bag())
 
     private var firestore: FirebaseFirestore? = null
 
@@ -37,7 +37,7 @@ class ShopActivity : AppCompatActivity() {
             } else {
                 item.buy(firestore)   //equip item
                 viewAdapter.notifyItemChanged(position) //update the data at the item's position
-                Toast.makeText(this, "Bought binoculars!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bought ${item.itemName}!", Toast.LENGTH_SHORT).show()
             }
         }
 

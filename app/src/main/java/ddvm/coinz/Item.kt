@@ -20,7 +20,7 @@ class Binoculars: Item() {
     override val itemName = "Binoculars"
     override val itemDescription = "Increases vision range by 50m"
     override val price = 100000.0
-    override val iconResource: Int = R.drawable.ic_binoculars
+    override val iconResource = R.drawable.ic_binoculars
     override var additionalVisionRange = 50
     override fun buy(firestore: FirebaseFirestore?) {
         super.buy(firestore)
@@ -28,10 +28,17 @@ class Binoculars: Item() {
         User.increaseVisionRange(additionalVisionRange)
     }
 }
-/*
+
 class Bag: Item() {
     override val itemName = "Bag"
     override val itemDescription = "Increases wallet capacity by 15 coins"
     override val price = 25000.0
+    override val iconResource = R.drawable.ic_bag
     override var additionalWalletCapacity = 15
-}*/
+    override fun buy(firestore: FirebaseFirestore?) {
+        super.buy(firestore)
+        User.setBag(firestore, true)
+        User.increaseWalletCapacity(15)
+    }
+
+}
