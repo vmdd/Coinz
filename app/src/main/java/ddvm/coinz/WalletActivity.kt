@@ -18,7 +18,7 @@ class WalletActivity : AppCompatActivity() {
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
 
-    private lateinit var userLastLocation: Location
+    private lateinit var userLastLocation: Location             //last location passed from MainActivity
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -28,6 +28,7 @@ class WalletActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
 
+        //get data passed in an Intent
         userLastLocation = intent.getParcelableExtra(MainActivity.EXTRA_LOCATION)
 
         //cloud firestore
@@ -61,6 +62,7 @@ class WalletActivity : AppCompatActivity() {
         }
     }
 
+    //delete selected coins from the wallet
     private fun discardSelectedCoins() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
 
@@ -95,9 +97,11 @@ class WalletActivity : AppCompatActivity() {
         }
 
         if(nStoredCoins == 0) {
+            //no coins selected
             Toast.makeText(this, getString(R.string.no_coins_to_pay_in_selected),
                     Toast.LENGTH_SHORT).show()
         } else {
+            //pay in successful
             Toast.makeText(this, getString(R.string.transaction_successful), Toast.LENGTH_SHORT).show()
             User.addGold(firestore, gold)                   //update user's gold after transaction
             User.addPaidInCoins(firestore, nStoredCoins)    //update the number of stored coins in the bank today

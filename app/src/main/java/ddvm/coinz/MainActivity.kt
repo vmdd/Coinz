@@ -156,7 +156,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 startActivity(Intent(this, ShopActivity::class.java))
             }
             R.id.nav_send_coins -> {
-                startActivity(Intent(this, SendCoinsActivity::class.java))
+                startActivity(Intent(this, SendCoinsActivity::class.java)
+                        .putExtra(EXTRA_LOCATION, originLocation))
             }
             R.id.nav_received_coins -> {
                 startActivity(Intent(this, ReceivedCoinsActivity::class.java))
@@ -214,7 +215,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
     }
-
 
     private fun enableLocation() {
         if(PermissionsManager.areLocationPermissionsGranted(this)){
@@ -300,7 +300,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
     }
-
 
     override fun onStart() {
         super.onStart()

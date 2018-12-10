@@ -53,6 +53,9 @@
     <string name="send_coins_activity_tag">SendCoinsActivity</string>
     <string name="prompt_recipient">Recipient\'s username</string>
     <string name="send_coins">Send Coins</string>
+    <string name="not_in_bank_for_send_coins">Go to the bank to send coins</string>
+    <string name="no_spare_change">You can only send coins after storing 25 coins in the bank on a given day</string>
+    <string name="no_coins_to_send">Please select coins to send</string>
 
     <!-- received coins strings -->
     <string name="received_coins">Received coins</string>
