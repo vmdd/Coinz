@@ -179,13 +179,19 @@ object User {
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromCollection] error deleting coin document", e) }
     }
 
-    //updates user's stats with given item bonuses
-    fun equipItem(firestore: FirebaseFirestore?, item: Item) {
-        if(item.additionalVisionRange!=0) {
+    //notes that user has given item and updates the stats
+    fun buyItem(firestore: FirebaseFirestore?, item: Item) {
+        if(item is Binoculars) {
             visionRange += item.additionalVisionRange
             binoculars = true
+            firestore?.document("users/$userId")
+                    ?.update("binoculars", binoculars)
         }
+    }
+
+    fun decreaseGold(firestore: FirebaseFirestore?,goldAmount: Double) {
+        gold -= goldAmount
         firestore?.document("users/$userId")
-                ?.update("binoculars", binoculars)
+                ?.update("gold", gold)
     }
 }

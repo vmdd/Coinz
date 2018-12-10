@@ -33,8 +33,8 @@ class ItemsAdapter(private val context: Context, private val items: List<Item>,
             view.item_name.text = item.itemName
             view.item_description.text = item.itemDescription
 
-            when(item.itemName) {
-                "Binoculars" -> {
+            //check the type of the item
+            if(item is Binoculars) {
                     //set the icon for binoculars
                     view.item_icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_binoculars))
 
@@ -45,10 +45,11 @@ class ItemsAdapter(private val context: Context, private val items: List<Item>,
                         view.buy_item.isEnabled = false
                     } else {
                         //set the button text to "buy" and set the click listener
-                        view.buy_item.text = context.getString(R.string.buy_item)
+                        val goldIcon = ContextCompat.getDrawable(context, R.drawable.gold)
+                        view.buy_item.setCompoundDrawablesWithIntrinsicBounds(goldIcon, null, null, null)
+                        view.buy_item.text = Utils.formatGold(item.price.toDouble())
                         view.buy_item.setOnClickListener {clickListener(item, adapterPosition)}
                     }
-                }
             }
 
         }

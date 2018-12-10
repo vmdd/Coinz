@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //updates the data in the header
     private fun updateDrawerHeader() {
         header_username.text = User.getUsername()
-        header_gold.text = User.getGold().toInt().toString()
+        header_gold.text = Utils.formatGold(User.getGold())         //display formatted gold
         header_vision_range.text = User.getVisionRange().toString()
 
         val nCoins = User.getWallet().size  //number of coins in wallet

@@ -32,9 +32,13 @@ class ShopActivity : AppCompatActivity() {
         viewManager = LinearLayoutManager(this)
         viewAdapter = ItemsAdapter(this, items) { item, position ->
             //click listener for listening to "buy" button
-            item.equip(firestore)   //equip item
-            viewAdapter.notifyItemChanged(position) //update the data at the item's position
-            Toast.makeText(this, "Bought binoculars!", Toast.LENGTH_SHORT).show()
+            if(!checkEnoughGold(item)) {
+                Toast.makeText(this, getString(R.string.not_enough_gold), Toast.LENGTH_SHORT).show()
+            } else {
+                item.buy(firestore)   //equip item
+                viewAdapter.notifyItemChanged(position) //update the data at the item's position
+                Toast.makeText(this, "Bought binoculars!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         items_recycler_view.apply {
@@ -45,5 +49,9 @@ class ShopActivity : AppCompatActivity() {
 
             adapter = viewAdapter
         }
+    }
+
+    private fun checkEnoughGold(item:Item): Boolean {
+        return item.price <= User.getGold()
     }
 }

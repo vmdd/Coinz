@@ -135,4 +135,12 @@ object Utils {
         icons["SHIL9"] = R.drawable.blue_9
         return icons[select]!!
     }
+
+    fun formatGold(gold:Double) : String {
+        val goldi = gold.toInt()
+        return when {
+            goldi >10000 -> goldi.div(1000).toString() + 'k'
+            else -> goldi.toString()
+        }
+    }
 }

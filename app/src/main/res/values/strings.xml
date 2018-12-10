@@ -43,6 +43,7 @@
     <string name="shop">Shop</string>
     <string name="buy_item">Buy</string>
     <string name="item_owned">Bought</string>
+    <string name="not_enough_gold">You don\'t have enough gold to buy this item</string>
 
     <!-- send coins strings -->
     <string name="send_coins_activity_tag">SendCoinsActivity</string>
