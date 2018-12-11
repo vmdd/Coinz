@@ -453,10 +453,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
     private fun drawMarker(coin: Coin){
         val iconResource =
+                //check if user has glasses
                 if(User.hasItem("Glasses")) {
-                    Utils.selectIcon(coin.currency, coin.value.toInt().toString())
+                    Utils.selectIcon(coin.currency, coin.value.toInt().toString())      //icon with coin value
                 } else {
-                    Utils.selectIcon(coin.currency)
+                    Utils.selectIcon(coin.currency)                                     //icon without coin value
                 }
         val icon: Icon = IconFactory.getInstance(this).fromResource(iconResource)       //icon of the marker
         //add marker to the map
@@ -525,6 +526,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onConnected() {
         Log.d(tag, "[onConnected] requesting location updates")
         locationEngine?.requestLocationUpdates()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onPermissionResult(granted: Boolean) {
