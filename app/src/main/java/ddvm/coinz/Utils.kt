@@ -84,6 +84,16 @@ object Utils {
                 }
     }
 
+    fun selectColorForIcon(currency: String): Int {
+        return when(currency) {
+            "PENY" -> android.R.color.holo_red_light
+            "DOLR" -> android.R.color.holo_green_light
+            "QUID" -> android.R.color.holo_orange_light
+            "SHIL" -> android.R.color.holo_blue_bright
+            else   -> android.R.color.transparent
+        }
+    }
+
     //select icon representing the coin currency and value
     //if value of the coin is not passed, returns icon without number
     fun selectIcon(currency: String, displayValue: String = ""): Int {

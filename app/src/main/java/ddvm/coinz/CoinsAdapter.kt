@@ -47,8 +47,9 @@ open class CoinsAdapter(private val context: Context, private val coins:MutableL
             view.item_checkBox.isChecked = itemStateArray.get(adapterPosition)  //set the textbox to the correct state
             view.setOnClickListener { v -> coinItemClicked(v) }
             view.item_checkBox.setOnClickListener { v -> coinItemClicked(v)}
-            val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())
-            view.coin_icon.setImageDrawable(ContextCompat.getDrawable(context, iconResource))
+            //val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())
+            view.coin_icon.text = coin.value.toInt().toString()
+            view.coin_icon.background.setTint(ContextCompat.getColor(context, Utils.selectColorForIcon(coin.currency)))
         }
 
         //changes the checkbox state and stores it in the itemStateArray
