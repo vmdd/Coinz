@@ -3,6 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_check_all">Check all</string>
     <string name="action_sort_gold">Sort by gold value</string>
+    <string name="action_sort_currency">Sort by currency</string>
     <!-- firebase access token -->
     <string name="access_token">pk.eyJ1IjoiZGR2bSIsImEiOiJjam4xbW9idDMxZ2lyM3FwbGN6cGZoaGJjIn0.1gKNVn6Quvkn4PPjx40k5w</string>
     <string name="title_activity_login">Sign in</string>

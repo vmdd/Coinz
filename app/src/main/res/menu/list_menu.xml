@@ -10,4 +10,8 @@
         android:id="@+id/sort_gold"
         app:showAsAction="never"
         android:title="@string/action_sort_gold" />
+    <item
+        android:id="@+id/sort_currency"
+        app:showAsAction="never"
+        android:title="@string/action_sort_currency" />
 </menu>

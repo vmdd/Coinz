@@ -164,6 +164,11 @@ class WalletActivity : AppCompatActivity() {
                 viewAdapter.notifyDataSetChanged()
                 true
             }
+            R.id.sort_currency -> {
+                Utils.sortCoinsByCurrency(coins, exchangeRates)
+                viewAdapter.notifyDataSetChanged()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
