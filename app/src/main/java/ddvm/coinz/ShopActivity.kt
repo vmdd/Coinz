@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.activity_shop.*
 
 class ShopActivity : AppCompatActivity() {
 
-    private var items = listOf(Binoculars(), Bag())
+    private var items = listOf(Binoculars(), Bag(), Glasses())
 
     private var firestore: FirebaseFirestore? = null
 

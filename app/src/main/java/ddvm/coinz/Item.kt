@@ -10,10 +10,10 @@ abstract class Item {
     abstract val iconResource: Int
     open var additionalVisionRange: Int = 0
     open var additionalWalletCapacity: Int = 0
-    open var coinRecognition: Boolean = false
 
     open fun buy(firestore: FirebaseFirestore?) {
         User.decreaseGold(firestore, this.price)
+        User.setStatsChanged(true)
     }
 }
 
@@ -42,6 +42,18 @@ class Bag: Item() {
         super.buy(firestore)
         User.setBag(firestore, true)
         User.increaseWalletCapacity(15)
+    }
+}
+
+//item enables the user to see coin values on the map
+class Glasses: Item() {
+    override val itemName = "Glasses"
+    override val itemDescription = "Shows value of coins on the map"
+    override val price = 10000.0
+    override val iconResource = R.drawable.ic_glasses
+    override fun buy(firestore: FirebaseFirestore?) {
+        super.buy(firestore)
+        User.setGlasses(firestore, true)
     }
 
 }

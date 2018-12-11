@@ -48,7 +48,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         coins.addAll(User.getWallet())
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = ReceivedCoinsAdapter(this, coins)
+        viewAdapter = ReceivedCoinsAdapter(this, coins, exchangeRates)
 
         coins_received_recycler_view.apply {
             setHasFixedSize(true)

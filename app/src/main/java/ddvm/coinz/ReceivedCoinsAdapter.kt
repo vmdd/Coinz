@@ -6,7 +6,8 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.item_received_coin.view.*
 
 //inherited CoinsAdapter, modified to bind sender field
-class ReceivedCoinsAdapter(context: Context, private val coins:MutableList<Coin>): CoinsAdapter(context, coins) {
+class ReceivedCoinsAdapter(context: Context, private val coins:MutableList<Coin>,
+                           exchangeRates: MutableMap<String,Double>): CoinsAdapter(context, coins, exchangeRates) {
 
     //override to include another item layout
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoinViewHolder {

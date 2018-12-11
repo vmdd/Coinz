@@ -108,58 +108,59 @@ object Utils {
     //if value of the coin is not passed, returns icon without number
     fun selectIcon(currency: String, displayValue: String = ""): Int {
         val select = currency + displayValue
-        val icons = mutableMapOf<String, Int>()
-        icons["PENY"] = R.drawable.red
-        icons["PENY0"] = R.drawable.red_0
-        icons["PENY1"] = R.drawable.red_1
-        icons["PENY2"] = R.drawable.red_2
-        icons["PENY3"] = R.drawable.red_3
-        icons["PENY4"] = R.drawable.red_4
-        icons["PENY5"] = R.drawable.red_5
-        icons["PENY6"] = R.drawable.red_6
-        icons["PENY7"] = R.drawable.red_7
-        icons["PENY8"] = R.drawable.red_8
-        icons["PENY9"] = R.drawable.red_9
-        icons["DOLR"] = R.drawable.green
-        icons["DOLR0"] = R.drawable.green_0
-        icons["DOLR1"] = R.drawable.green_1
-        icons["DOLR2"] = R.drawable.green_2
-        icons["DOLR3"] = R.drawable.green_3
-        icons["DOLR4"] = R.drawable.green_4
-        icons["DOLR5"] = R.drawable.green_5
-        icons["DOLR6"] = R.drawable.green_6
-        icons["DOLR7"] = R.drawable.green_7
-        icons["DOLR8"] = R.drawable.green_8
-        icons["DOLR9"] = R.drawable.green_9
-        icons["QUID"] = R.drawable.yellow
-        icons["QUID0"] = R.drawable.yellow_0
-        icons["QUID1"] = R.drawable.yellow_1
-        icons["QUID2"] = R.drawable.yellow_2
-        icons["QUID3"] = R.drawable.yellow_3
-        icons["QUID4"] = R.drawable.yellow_4
-        icons["QUID5"] = R.drawable.yellow_5
-        icons["QUID6"] = R.drawable.yellow_6
-        icons["QUID7"] = R.drawable.yellow_7
-        icons["QUID8"] = R.drawable.yellow_8
-        icons["QUID9"] = R.drawable.yellow_9
-        icons["SHIL"] = R.drawable.blue
-        icons["SHIL0"] = R.drawable.blue_0
-        icons["SHIL1"] = R.drawable.blue_1
-        icons["SHIL2"] = R.drawable.blue_2
-        icons["SHIL3"] = R.drawable.blue_3
-        icons["SHIL4"] = R.drawable.blue_4
-        icons["SHIL5"] = R.drawable.blue_5
-        icons["SHIL6"] = R.drawable.blue_6
-        icons["SHIL7"] = R.drawable.blue_7
-        icons["SHIL8"] = R.drawable.blue_8
-        icons["SHIL9"] = R.drawable.blue_9
-        return icons[select]!!
+        return when (select) {
+            "PENY" -> R.drawable.red
+            "PENY0" -> R.drawable.red_0
+            "PENY1" -> R.drawable.red_1
+            "PENY2" -> R.drawable.red_2
+            "PENY3" -> R.drawable.red_3
+            "PENY4" -> R.drawable.red_4
+            "PENY5" -> R.drawable.red_5
+            "PENY6" -> R.drawable.red_6
+            "PENY7" -> R.drawable.red_7
+            "PENY8" -> R.drawable.red_8
+            "PENY9" -> R.drawable.red_9
+            "DOLR" -> R.drawable.green
+            "DOLR0" -> R.drawable.green_0
+            "DOLR1" -> R.drawable.green_1
+            "DOLR2" -> R.drawable.green_2
+            "DOLR3" -> R.drawable.green_3
+            "DOLR4" -> R.drawable.green_4
+            "DOLR5" -> R.drawable.green_5
+            "DOLR6" -> R.drawable.green_6
+            "DOLR7" -> R.drawable.green_7
+            "DOLR8" -> R.drawable.green_8
+            "DOLR9" -> R.drawable.green_9
+            "QUID" -> R.drawable.yellow
+            "QUID0" -> R.drawable.yellow_0
+            "QUID1" -> R.drawable.yellow_1
+            "QUID2" -> R.drawable.yellow_2
+            "QUID3" -> R.drawable.yellow_3
+            "QUID4" -> R.drawable.yellow_4
+            "QUID5" -> R.drawable.yellow_5
+            "QUID6" -> R.drawable.yellow_6
+            "QUID7" -> R.drawable.yellow_7
+            "QUID8" -> R.drawable.yellow_8
+            "QUID9" -> R.drawable.yellow_9
+            "SHIL" -> R.drawable.blue
+            "SHIL0" -> R.drawable.blue_0
+            "SHIL1" -> R.drawable.blue_1
+            "SHIL2" -> R.drawable.blue_2
+            "SHIL3" -> R.drawable.blue_3
+            "SHIL4" -> R.drawable.blue_4
+            "SHIL5" -> R.drawable.blue_5
+            "SHIL6" -> R.drawable.blue_6
+            "SHIL7" -> R.drawable.blue_7
+            "SHIL8" -> R.drawable.blue_8
+            "SHIL9" -> R.drawable.blue_9
+            else -> R.drawable.blue     //most likely never end up here
+        }
     }
 
     fun formatGold(gold:Double) : String {
         val goldi = gold.toInt()
         return when {
-            goldi >10000 -> goldi.div(1000).toString() + 'k'
+            goldi >=10000 -> goldi.div(1000).toString() + 'k'
             else -> goldi.toString()
         }
     }

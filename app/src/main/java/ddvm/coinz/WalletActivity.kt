@@ -46,7 +46,7 @@ class WalletActivity : AppCompatActivity() {
         exchangeRates.putAll(Utils.getExchangeRates(this))
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = CoinsAdapter(this, coins)
+        viewAdapter = CoinsAdapter(this, coins, exchangeRates)
 
         coins_recycler_view.apply {
             setHasFixedSize(true)

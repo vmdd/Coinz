@@ -333,7 +333,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         //check if map for a given day already downloaded, else download it
         getGeoJsonMap()
-        //updateDrawerHeader()    //updates header data
     }
 
     //runs after the user data is downloaded
@@ -447,7 +446,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
     //adds markers to the map, adds (coin id, marker id) to the coinsMarkersMap
     private fun drawMarker(coin: Coin){
-        val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())        //find coin resource file
+        val iconResource =
+                if(User.hasItem("Glasses")) {
+                    Utils.selectIcon(coin.currency, coin.value.toInt().toString())
+                } else {
+                    Utils.selectIcon(coin.currency)
+                }
         val icon: Icon = IconFactory.getInstance(this).fromResource(iconResource)       //icon of the marker
         //add marker to the map
         val marker: Marker? = map?.addMarker(MarkerOptions()
@@ -536,6 +540,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         mapView?.onResume()
         //check if user enabled autocollection which might have been changed in settings
         autocollection = Utils.getAutocollectionState(this)
+        //check if user's stats just changed (by buying item in the shop)
+        if(User.getStatsChanged())
+            refreshMap()
+    }
+
+    //deletes all markers and redraws them. Called after user bought an item in the shop.
+    private fun refreshMap() {
+        map?.clear()                    //clear all current markers
+        coinsMarkersMap.clear()         //clear all entries
+        if(originLatLng!=null)
+            displayCoinsInVisionRange(originLatLng!!)     //redraw all markers in range
+        User.setStatsChanged(false)     //stats change applied, reset the entry
     }
 
     override fun onPause() {

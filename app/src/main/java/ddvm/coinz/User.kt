@@ -18,8 +18,10 @@ object User {
     private val receivedCoins = mutableListOf<Coin>()               //coins currently in user's receivedCoins account waiting for pay into the bank
     private var binoculars = false                                  //if user bought and owns binoculars
     private var bag = false
+    private var glasses = false
     private var walletCapacity = 10                                 //user's wallet capacity (max number of coins in the wallet)
     private var visionRange = 100                                   //range in which user can see coins on the map
+    private var statsChanged = false                                //sets to true right after user buys and item to inform main activity about the change
 
     //downloads user's data from firestore
     fun downloadUserData(mAuth: FirebaseAuth?, firestore: FirebaseFirestore?, completeListener: () -> Unit) {
@@ -51,6 +53,9 @@ object User {
                 bag = true
             }
 
+            if(document.getBoolean("glasses") == true) {
+                glasses = true
+            }
 
 
             //download user wallet
@@ -115,10 +120,13 @@ object User {
 
     fun getVisionRange() = visionRange
 
+    fun getStatsChanged() = statsChanged
+
     fun hasItem(itemName: String): Boolean {
         return when(itemName) {
             "Binoculars" -> binoculars
             "Bag" -> bag
+            "Glasses" -> glasses
             else -> false
         }
     }
@@ -201,6 +209,16 @@ object User {
         bag = value
         firestore?.document("users/$userId")
                 ?.update("bag", bag)
+    }
+
+    fun setGlasses(firestore: FirebaseFirestore?, value: Boolean) {
+        glasses = value
+        firestore?.document("users/$userId")
+                ?.update("glasses", glasses)
+    }
+
+    fun setStatsChanged(value:Boolean) {
+        statsChanged = value
     }
 
     fun increaseVisionRange(range: Int) {
