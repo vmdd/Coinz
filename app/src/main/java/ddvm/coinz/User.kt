@@ -46,7 +46,7 @@ object User {
         val firestoreUser = firestore?.collection(USERS_COLLECTION_KEY)?.document(userId!!)  //after login mUser shouldn't be null
 
         firestoreUser?.get()?.addOnSuccessListener {document ->
-            if(document.getString("username")!=null)
+            if(document.getString(USERNAME_FIELD_KEY)!=null)
                 username = document.getString(USERNAME_FIELD_KEY)!!
             collectedCoins = document.data?.get(COLLECTED_COINS_FIELD_KEY) as? MutableList<*>
             lastPlayDate = document.getString(LAST_PLAY_FIELD_KEY)

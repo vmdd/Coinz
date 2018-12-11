@@ -17,7 +17,6 @@ class WalletActivity : AppCompatActivity() {
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var firestore: FirebaseFirestore? = null
 
-    private val coins = mutableListOf<Coin>()                   //a copy of coins in user wallet
     private var checkedAll = false
 
     private var userLastLocation: LatLng? = null           //last location passed from MainActivity
@@ -43,11 +42,10 @@ class WalletActivity : AppCompatActivity() {
                 .build()
         firestore?.firestoreSettings = settings
 
-        coins.addAll(User.getWallet())
         exchangeRates.putAll(Utils.getExchangeRates(this))
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = CoinsAdapter(this, coins, exchangeRates)
+        viewAdapter = CoinsAdapter(this, User.getWallet(), exchangeRates)
 
         coins_recycler_view.apply {
             setHasFixedSize(true)
@@ -161,12 +159,12 @@ class WalletActivity : AppCompatActivity() {
                 true
             }
             R.id.sort_gold -> {
-                Utils.sortCoinsByGold(coins, exchangeRates)
+                Utils.sortCoinsByGold(User.getWallet(), exchangeRates)
                 viewAdapter.notifyDataSetChanged()
                 true
             }
             R.id.sort_currency -> {
-                Utils.sortCoinsByCurrency(coins, exchangeRates)
+                Utils.sortCoinsByCurrency(User.getWallet(), exchangeRates)
                 viewAdapter.notifyDataSetChanged()
                 true
             }
