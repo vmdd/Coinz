@@ -213,12 +213,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             addPlacesMarkers()
 
             map?.setOnMarkerClickListener {marker ->
-                if(originLatLng!=null) {
+                if(marker.title in listOf("Bank", "Tower", "Shop")) {
+                    marker.showInfoWindow(map!!, mapView!!)
+                } else if(originLatLng!=null) {
                     val distance = marker.position.distanceTo(originLatLng)       //distance from the user to the coin
                     if (distance <= collectRange) {
                         if(checkSpaceInWallet()) {
                             collectCoin(marker.title)
-                            Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.collected_coin), Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(this, getString(R.string.wallet_full), Toast.LENGTH_SHORT).show()
                         }
@@ -229,7 +231,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                                 .show()
                     }
                 }
-                true
+                false
             }
         }
     }

@@ -31,7 +31,8 @@
 
     <!-- main activity strings -->
     <string name="wallet_full">No space in the wallet!</string>
-    <string name="distance_to_object">Distance to object: </string>
+    <string name="distance_to_object">Distance to coin: </string>
+    <string name="collected_coin">Coin collected!</string>
 
     <!-- wallet strings -->
     <string name="wallet">Wallet</string>
