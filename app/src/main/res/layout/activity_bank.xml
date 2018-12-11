@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".BankActivity">
+
+    <TextView
+        android:id="@+id/exchange_rates_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/exchange_rates"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/shil"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/circle"
+        android:backgroundTint="@android:color/holo_blue_bright"
+        android:gravity="center"
+        android:text="@string/shil"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/quid" />
+
+    <TextView
+        android:id="@+id/peny"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/circle"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:gravity="center"
+        android:text="@string/peny"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exchange_rates_title" />
+
+    <TextView
+        android:id="@+id/dolr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/circle"
+        android:backgroundTint="@android:color/holo_green_light"
+        android:gravity="center"
+        android:text="@string/dolr"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/peny" />
+
+    <TextView
+        android:id="@+id/quid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/circle"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:gravity="center"
+        android:text="@string/quid"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dolr" />
+
+    <TextView
+        android:id="@+id/peny_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:gravity="bottom"
+        android:drawableStart="@drawable/gold"
+        android:drawablePadding="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@id/peny"
+        app:layout_constraintStart_toEndOf="@+id/peny" />
+    <TextView
+        android:id="@+id/dolr_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:gravity="bottom"
+        android:drawableStart="@drawable/gold"
+        android:drawablePadding="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@id/dolr"
+        app:layout_constraintStart_toEndOf="@+id/dolr" />
+    <TextView
+        android:id="@+id/quid_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:gravity="bottom"
+        android:drawableStart="@drawable/gold"
+        android:drawablePadding="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@id/quid"
+        app:layout_constraintStart_toEndOf="@+id/quid" />
+    <TextView
+        android:id="@+id/shil_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:gravity="bottom"
+        android:drawableStart="@drawable/gold"
+        android:drawablePadding="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@id/shil"
+        app:layout_constraintStart_toEndOf="@+id/shil" />
+
+    <TextView
+        android:id="@+id/coin_limit_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/coin_limit"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shil" />
+
+    <TextView
+        android:id="@+id/n_coins_paid_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/coin_limit_title" />
+</android.support.constraint.ConstraintLayout>

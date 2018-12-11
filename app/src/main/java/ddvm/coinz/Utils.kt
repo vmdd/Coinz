@@ -94,6 +94,7 @@ object Utils {
                 }
     }
 
+    //select colors resources for icon in the lists
     fun selectColorForIcon(currency: String): Int {
         return when(currency) {
             "PENY" -> android.R.color.holo_red_light

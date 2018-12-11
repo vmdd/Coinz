@@ -10,6 +10,10 @@
             android:icon="@drawable/shop"
             android:title="@string/shop" />
         <item
+            android:id="@+id/nav_bank"
+            android:icon="@drawable/bank"
+            android:title="@string/bank" />
+        <item
             android:id="@+id/nav_send_coins"
             android:icon="@drawable/send_coin"
             android:title="@string/send_coins" />

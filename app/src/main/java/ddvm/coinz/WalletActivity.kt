@@ -20,13 +20,14 @@ class WalletActivity : AppCompatActivity() {
     private val coins = mutableListOf<Coin>()                   //a copy of coins in user wallet
     private var checkedAll = false
 
-    private val dailyLimit = 25                                 //daily limit of coins to pay in
-
     private var userLastLocation: LatLng? = null           //last location passed from MainActivity
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
+    companion object {
+        const val dailyLimit = 25               //daily limit of coins to pay in
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

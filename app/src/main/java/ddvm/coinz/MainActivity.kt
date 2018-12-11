@@ -172,6 +172,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 startActivity(Intent(this, ShopActivity::class.java)
                         .putExtra(EXTRA_LOCATION, originLatLng))
             }
+            R.id.nav_bank -> {
+                startActivity(Intent(this, BankActivity::class.java))
+            }
             R.id.nav_send_coins -> {
                 startActivity(Intent(this, SendCoinsActivity::class.java)
                         .putExtra(EXTRA_LOCATION, originLatLng))
@@ -203,7 +206,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             map = mapboxMap
             //Set user interface options
             map?.uiSettings?.isCompassEnabled = true
-            map?.uiSettings?.isZoomControlsEnabled = true
 
             //make location information available
             enableLocation()

@@ -61,6 +61,10 @@
             android:name=".SettingsActivity"
             android:label="@string/settings"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".BankActivity"
+            android:label="@string/bank"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

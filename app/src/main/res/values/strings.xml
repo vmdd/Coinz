@@ -54,6 +54,15 @@
     <string name="not_enough_gold">You don\'t have enough gold to buy this item</string>
     <string name="not_in_shop">Go to the shop to buy items</string>
 
+    <!-- bank strings -->
+    <string name="bank">Bank</string>
+    <string name="exchange_rates">Exchange Rates</string>
+    <string name="shil">SHIL</string>
+    <string name="peny">PENY</string>
+    <string name="dolr">DOLR</string>
+    <string name="quid">QUID</string>
+    <string name="coin_limit">Coins paid in today</string>
+
     <!-- send coins strings -->
     <string name="send_coins_activity_tag">SendCoinsActivity</string>
     <string name="prompt_recipient">Recipient\'s username</string>
