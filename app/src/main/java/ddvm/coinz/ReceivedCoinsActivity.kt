@@ -23,6 +23,8 @@ class ReceivedCoinsActivity : AppCompatActivity() {
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
 
+    private val coins = mutableListOf<Coin>()                   //a copy of coins in user wallet
+
     private var checkedAll = false
 
 
@@ -43,8 +45,10 @@ class ReceivedCoinsActivity : AppCompatActivity() {
                 .build()
         firestore?.firestoreSettings = settings
 
+        coins.addAll(User.getWallet())
+
         viewManager = LinearLayoutManager(this)
-        viewAdapter = ReceivedCoinsAdapter(this, User.getReceivedCoins())
+        viewAdapter = ReceivedCoinsAdapter(this, coins)
 
         coins_received_recycler_view.apply {
             setHasFixedSize(true)
@@ -131,6 +135,11 @@ class ReceivedCoinsActivity : AppCompatActivity() {
                     item.setIcon(R.drawable.ic_select_all)      //change the icon
                 }
                 checkedAll=!checkedAll
+                true
+            }
+            R.id.sort_gold -> {
+                Utils.sortCoinsByGold(coins, exchangeRates)
+                viewAdapter.notifyDataSetChanged()
                 true
             }
             else -> super.onOptionsItemSelected(item)

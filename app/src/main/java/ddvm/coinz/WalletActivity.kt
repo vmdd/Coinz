@@ -17,6 +17,7 @@ class WalletActivity : AppCompatActivity() {
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var firestore: FirebaseFirestore? = null
 
+    private val coins = mutableListOf<Coin>()                   //a copy of coins in user wallet
     private var checkedAll = false
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
@@ -41,10 +42,11 @@ class WalletActivity : AppCompatActivity() {
                 .build()
         firestore?.firestoreSettings = settings
 
+        coins.addAll(User.getWallet())
         exchangeRates.putAll(Utils.getExchangeRates(this))
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = CoinsAdapter(this, User.getWallet())
+        viewAdapter = CoinsAdapter(this, coins)
 
         coins_recycler_view.apply {
             setHasFixedSize(true)
@@ -131,20 +133,6 @@ class WalletActivity : AppCompatActivity() {
         return (dailyLimit - User.getNPaidInCoins() - nCoinsToPayIn >= 0)
     }
 
-    private fun sortCoinsByGold() {
-        User.getWallet().sortWith(object:Comparator<Coin> {
-            override fun compare(coin0: Coin, coin1: Coin): Int {
-                return when {
-                    coin0.toGold(exchangeRates) > coin1.toGold(exchangeRates) -> -1
-                    coin0.toGold(exchangeRates) < coin1.toGold(exchangeRates) -> 1
-                    else -> 0
-                }
-            }
-        })
-        viewAdapter.notifyDataSetChanged()
-    }
-
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.list_menu, menu)
@@ -172,7 +160,8 @@ class WalletActivity : AppCompatActivity() {
                 true
             }
             R.id.sort_gold -> {
-                sortCoinsByGold()
+                Utils.sortCoinsByGold(coins, exchangeRates)
+                viewAdapter.notifyDataSetChanged()
                 true
             }
             else -> super.onOptionsItemSelected(item)

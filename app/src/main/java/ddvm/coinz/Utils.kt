@@ -163,4 +163,16 @@ object Utils {
             else -> goldi.toString()
         }
     }
+
+    fun sortCoinsByGold(coins: MutableList<Coin>, exchangeRates: MutableMap<String, Double>) {
+        coins.sortWith(object:Comparator<Coin> {
+            override fun compare(coin0: Coin, coin1: Coin): Int {
+                return when {
+                    coin0.toGold(exchangeRates) > coin1.toGold(exchangeRates) -> -1
+                    coin0.toGold(exchangeRates) < coin1.toGold(exchangeRates) -> 1
+                    else -> 0
+                }
+            }
+        })
+    }
 }

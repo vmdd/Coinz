@@ -1,41 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- layout for each coin received from another user -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingStart="@dimen/activity_horizontal_margin"
-    android:paddingEnd="@dimen/activity_horizontal_margin">   <!-- each item has only enough space to display information -->
+    android:layout_height="wrap_content">   <!-- each item has only enough space to display information -->
 
-    <!-- coin icon -->
-    <ImageView
+    <!-- coin icon corresponding to value and currency -->
+    <TextView
         android:id="@+id/coin_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        tools:ignore="contentDescription"/>
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/circle"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- text view for coin currency -->
 
     <TextView
         android:id="@+id/coin_currency"
-        android:layout_width="0dp"
+        android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="24dp"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/coin_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- display gold value of coin -->
+    <TextView
+        android:id="@+id/gold_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:drawableStart="@drawable/gold_20"
+        android:drawablePadding="8dp"
+        android:textSize="12sp"
+        android:gravity="bottom"
+        app:layout_constraintStart_toEndOf="@+id/coin_icon"
+        app:layout_constraintTop_toBottomOf="@+id/coin_currency" />
 
     <!-- text view for sender of the coin -->
     <TextView
         android:id="@+id/sender"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        app:layout_constraintStart_toEndOf="@id/coin_currency"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/item_checkBox"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- checkbox for showing coin selection -->
     <CheckBox
         android:id="@+id/item_checkBox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

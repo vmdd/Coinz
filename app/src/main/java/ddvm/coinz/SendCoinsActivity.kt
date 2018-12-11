@@ -22,7 +22,9 @@ class SendCoinsActivity : AppCompatActivity() {
 
     private var userLastLocation: LatLng? = null
 
+    private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var checkedAll = false
+    private val coins = mutableListOf<Coin>()                   //a copy of users wallet
 
     private lateinit var viewAdapter: CoinsAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -42,8 +44,11 @@ class SendCoinsActivity : AppCompatActivity() {
                 .build()
         firestore?.firestoreSettings = settings
 
+        coins.addAll(User.getWallet())
+        exchangeRates.putAll(Utils.getExchangeRates(this))
+
         viewManager = LinearLayoutManager(this)
-        viewAdapter = CoinsAdapter(this, User.getWallet())
+        viewAdapter = CoinsAdapter(this, coins)
 
         coins_recycler_view.apply {
             setHasFixedSize(true)
@@ -143,6 +148,11 @@ class SendCoinsActivity : AppCompatActivity() {
                     item.setIcon(R.drawable.ic_select_all)      //change the icon
                 }
                 checkedAll=!checkedAll
+                true
+            }
+            R.id.sort_gold -> {
+                Utils.sortCoinsByGold(coins, exchangeRates)
+                viewAdapter.notifyDataSetChanged()
                 true
             }
             else -> super.onOptionsItemSelected(item)

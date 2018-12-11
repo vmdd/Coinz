@@ -3,22 +3,14 @@
 <!-- layout for each item (coin) in the recycler view in the wallet -->
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/linearLayout"
-    android:paddingTop="16dp"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <!-- coin icon corresponding to value and currency -->
-    <!--
-    <ImageView
-        android:id="@+id/coin_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        tools:ignore="contentDescription"/> -->
-
     <TextView
         android:id="@+id/coin_icon"
         android:layout_width="48dp"
@@ -46,9 +38,9 @@
         android:id="@+id/item_checkBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/gold_value"

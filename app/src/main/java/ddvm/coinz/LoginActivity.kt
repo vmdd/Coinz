@@ -49,6 +49,7 @@ class LoginActivity : AppCompatActivity(){
             if(task.isSuccessful){
                 //sign in success
                 //go to MainActivity
+                Log.d(tag,"[signIn] login successful")
                 goToMain()
             } else {
                 //sign in unsuccessful
