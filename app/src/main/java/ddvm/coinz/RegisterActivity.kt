@@ -140,7 +140,10 @@ class RegisterActivity : AppCompatActivity(){
                 User.N_PAY_IN_FIELD_KEY to 0,
                 User.LAST_PLAY_FIELD_KEY to "",
                 User.GOLD_FIELD_KEY to 0,
-                User.COLLECTED_COINS_FIELD_KEY to emptyList<String>()))
+                User.COLLECTED_COINS_FIELD_KEY to emptyList<String>(),
+                User.BINOCULARS_FIELD_KEY to false,
+                User.BAG_FIELD_KEY to false,
+                User.GLASSES_FIELD_KEY to false))
                 ?.addOnSuccessListener {
                     Log.d(tag, "[createUserDocument] user document successfully created")
                     goToMain()
