@@ -41,6 +41,8 @@ class WalletActivity : AppCompatActivity() {
                 .build()
         firestore?.firestoreSettings = settings
 
+        exchangeRates.putAll(Utils.getExchangeRates(this))
+
         viewManager = LinearLayoutManager(this)
         viewAdapter = CoinsAdapter(this, User.getWallet())
 
@@ -129,12 +131,19 @@ class WalletActivity : AppCompatActivity() {
         return (dailyLimit - User.getNPaidInCoins() - nCoinsToPayIn >= 0)
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        //read shared preferences file and exchange rates for coins
-        exchangeRates.putAll(Utils.getExchangeRates(this))
+    private fun sortCoinsByGold() {
+        User.getWallet().sortWith(object:Comparator<Coin> {
+            override fun compare(coin0: Coin, coin1: Coin): Int {
+                return when {
+                    coin0.toGold(exchangeRates) > coin1.toGold(exchangeRates) -> -1
+                    coin0.toGold(exchangeRates) < coin1.toGold(exchangeRates) -> 1
+                    else -> 0
+                }
+            }
+        })
+        viewAdapter.notifyDataSetChanged()
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -160,6 +169,10 @@ class WalletActivity : AppCompatActivity() {
                     item.setIcon(R.drawable.ic_select_all)      //change the icon
                 }
                 checkedAll=!checkedAll
+                true
+            }
+            R.id.sort_gold -> {
+                sortCoinsByGold()
                 true
             }
             else -> super.onOptionsItemSelected(item)

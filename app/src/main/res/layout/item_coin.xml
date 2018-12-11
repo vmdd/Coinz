@@ -36,10 +36,11 @@
         android:id="@+id/coin_currency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="24dp"
         android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/coin_icon" />
+        app:layout_constraintStart_toEndOf="@+id/coin_icon"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <CheckBox
         android:id="@+id/item_checkBox"
@@ -48,5 +49,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/gold_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:drawableStart="@drawable/gold_20"
+        android:drawablePadding="8dp"
+        android:textSize="12sp"
+        android:gravity="bottom"
+        app:layout_constraintStart_toEndOf="@+id/coin_icon"
+        app:layout_constraintTop_toBottomOf="@+id/coin_currency" />
 
 </android.support.constraint.ConstraintLayout>

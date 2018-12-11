@@ -29,6 +29,16 @@ object Utils {
         return exchangeRates
     }
 
+    fun calculateCoinsValueInGold(coins: List<Coin>, exchangeRates: MutableMap<String,Double>):
+            MutableList<Pair<Coin, Double>> {
+        val goldValueList = mutableListOf<Pair<Coin,Double>>()
+        for(coin in coins) {
+            goldValueList.add(Pair(coin,coin.toGold(exchangeRates)))
+        }
+
+        return goldValueList
+    }
+
     //saves geojson to the shared prefs
     fun saveMapToSharedPrefs(context: Context, downloadDate: String, mapJson: String) {
         Log.d(tag, "[saveMapToSharedPrefs] Storing lastDownloadDate of $downloadDate")

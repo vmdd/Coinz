@@ -50,6 +50,7 @@ open class CoinsAdapter(private val context: Context, private val coins:MutableL
             //val iconResource = Utils.selectIcon(coin.currency, coin.value.toInt().toString())
             view.coin_icon.text = coin.value.toInt().toString()
             view.coin_icon.background.setTint(ContextCompat.getColor(context, Utils.selectColorForIcon(coin.currency)))
+            view.gold_value.text = Utils.formatGold(coin.toGold(Utils.getExchangeRates(context)))
         }
 
         //changes the checkbox state and stores it in the itemStateArray
