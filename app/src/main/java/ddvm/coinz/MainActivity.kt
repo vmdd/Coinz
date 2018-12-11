@@ -151,10 +151,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             header_vision_range.setTextColor(ContextCompat.getColor(this, //default color
                     android.R.color.tab_indicator_text))
 
+        if(User.hasItem("Glasses"))
+            header_has_glasses.setImageResource(R.drawable.ic_check_black_24dp)
 
         val nCoins = User.getWallet().size  //number of coins in wallet
         val maxCapacity = User.getWalletCapacity()
-        header_wallet_capacity.text = "$nCoins/$maxCapacity"
+        header_wallet_capacity.text = "$nCoins/$maxCapacity"        //display how much space the user used already
     }
 
     //handling item selections from navigation menu

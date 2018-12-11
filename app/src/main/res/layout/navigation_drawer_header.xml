@@ -30,9 +30,9 @@
         android:id="@+id/gold_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintStart_toEndOf="@+id/header_icon"
+        app:layout_constraintStart_toEndOf="@+id/header_vision_range"
         app:layout_constraintTop_toBottomOf="@+id/vision_range_icon"
         app:srcCompat="@drawable/gold"
         tools:ignore="ContentDescription"/>
@@ -88,4 +88,27 @@
         android:textSize = "16sp"
         app:layout_constraintStart_toEndOf="@id/vision_range_icon"
         app:layout_constraintTop_toBottomOf="@+id/header_username" />
+
+    <ImageView
+        android:id="@+id/glasses_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toEndOf="@+id/header_icon"
+        app:layout_constraintTop_toBottomOf="@+id/vision_range_icon"
+        app:srcCompat="@drawable/ic_glasses"
+        tools:ignore="ContentDescription"/>
+
+    <ImageView
+        android:id="@+id/header_has_glasses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toEndOf="@+id/glasses_icon"
+        app:layout_constraintTop_toBottomOf="@+id/vision_range_icon"
+        app:srcCompat="@drawable/ic_close_black_24dp"
+        tools:ignore="ContentDescription"/>
+
 </android.support.constraint.ConstraintLayout>
