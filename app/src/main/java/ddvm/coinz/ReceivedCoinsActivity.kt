@@ -100,7 +100,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
 
     private fun removeCoin(position: Int) {
         //remove the coin from firestore and User received coins
-        User.removeCoinFromCollection(firestore,"received_coins",position)
+        User.removeCoinFromCollection(firestore,User.RECEIVED_COLLECTION_KEY,position)
         viewAdapter.notifyItemRemoved(position)
     }
 

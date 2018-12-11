@@ -81,7 +81,7 @@ class WalletActivity : AppCompatActivity() {
             //if the item is selected it is removed
             if(itemsStates.valueAt(i)) {
                 val position = itemsStates.keyAt(i)    //index of the coin
-                User.removeCoinFromCollection(firestore,"wallet",position)  //removes coin from the wallet
+                User.removeCoinFromCollection(firestore,User.WALLET_COLLECTION_KEY,position)  //removes coin from the wallet
                 viewAdapter.notifyItemRemoved(position)
             }
         }
@@ -101,7 +101,7 @@ class WalletActivity : AppCompatActivity() {
                 gold += User.getWallet()[position].toGold(exchangeRates)
                 nStoredCoins += 1   //increase number od stored coins
                 //remove coin from the wallet
-                User.removeCoinFromCollection(firestore,"wallet",position)
+                User.removeCoinFromCollection(firestore,User.WALLET_COLLECTION_KEY,position)
                 viewAdapter.notifyItemRemoved(position)
             }
         }

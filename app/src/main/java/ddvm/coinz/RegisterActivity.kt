@@ -133,14 +133,14 @@ class RegisterActivity : AppCompatActivity(){
 
     //creates an user document using user's id and stores username and lowercase username for comparison purposes
     private fun createUserDocument(mUser: FirebaseUser) {
-        firestoreUser = firestore?.collection("users")?.document(mUser.uid)     //document id is user's id
+        firestoreUser = firestore?.collection(User.USERS_COLLECTION_KEY)?.document(mUser.uid)     //document id is user's id
         //add username
-        firestoreUser?.set(mapOf("username" to username,
-                "lowercase_username" to username.toLowerCase(),
-                "n_paid_in_coins" to 0,
-                "last_play_date" to "",
-                "gold" to 0,
-                "collected_coins" to emptyList<String>()))
+        firestoreUser?.set(mapOf(User.USERNAME_FIELD_KEY to username,
+                User.LOWERCASE_USERNAME_FIELD_KEY to username.toLowerCase(),
+                User.N_PAY_IN_FIELD_KEY to 0,
+                User.LAST_PLAY_FIELD_KEY to "",
+                User.GOLD_FIELD_KEY to 0,
+                User.COLLECTED_COINS_FIELD_KEY to emptyList<String>()))
                 ?.addOnSuccessListener {
                     Log.d(tag, "[createUserDocument] user document successfully created")
                     goToMain()

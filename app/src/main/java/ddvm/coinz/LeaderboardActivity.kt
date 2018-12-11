@@ -34,7 +34,7 @@ class LeaderboardActivity : AppCompatActivity() {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
         firestore?.firestoreSettings = settings
-        firestoreUsers = firestore?.collection("users")
+        firestoreUsers = firestore?.collection(User.USERS_COLLECTION_KEY)
 
         viewManager = LinearLayoutManager(this)
         viewAdapter = LeaderboardAdapter(this, leaderboardList)

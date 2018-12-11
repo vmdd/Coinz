@@ -10,7 +10,7 @@ import com.google.gson.JsonParser
 object Utils {
     //gets exchange rates and stores them in the map
     private val tag = "Utils"
-    private val preferencesFile = "MyPrefsFile"
+    private const val preferencesFile = "MyPrefsFile"
 
     //gets exchange rates from geojson stored in shared preferences
     fun getExchangeRates(context: Context): MutableMap<String,Double> {
@@ -27,16 +27,6 @@ object Utils {
         exchangeRates["PENY"] = rates.get("PENY").asDouble
 
         return exchangeRates
-    }
-
-    fun calculateCoinsValueInGold(coins: List<Coin>, exchangeRates: MutableMap<String,Double>):
-            MutableList<Pair<Coin, Double>> {
-        val goldValueList = mutableListOf<Pair<Coin,Double>>()
-        for(coin in coins) {
-            goldValueList.add(Pair(coin,coin.toGold(exchangeRates)))
-        }
-
-        return goldValueList
     }
 
     //saves geojson to the shared prefs
@@ -77,7 +67,7 @@ object Utils {
     }
 
     fun checkUserExists(firestore: FirebaseFirestore?, username: String, checkComplete: (Boolean, QuerySnapshot?) -> Unit) {
-        firestore?.collection("users")
+        firestore?.collection(User.USERS_COLLECTION_KEY)
                 ?.whereEqualTo("lowercase_username", username.toLowerCase())        //querying for documents with same username
                 ?.get()
                 ?.addOnSuccessListener { documents ->

@@ -18,7 +18,7 @@ abstract class Item {
 }
 
 //item increases user's vision range
-class Binoculars: Item() {
+object Binoculars: Item() {
     override val itemName = "Binoculars"
     override val itemDescription = "Increases vision range by 50m"
     override val price = 100000.0
@@ -32,7 +32,7 @@ class Binoculars: Item() {
 }
 
 //item increases user's wallet capacity
-class Bag: Item() {
+object Bag: Item() {
     override val itemName = "Bag"
     override val itemDescription = "Increases wallet capacity by 15 coins"
     override val price = 25000.0
@@ -46,7 +46,7 @@ class Bag: Item() {
 }
 
 //item enables the user to see coin values on the map
-class Glasses: Item() {
+object Glasses: Item() {
     override val itemName = "Glasses"
     override val itemDescription = "Shows value of coins on the map"
     override val price = 10000.0

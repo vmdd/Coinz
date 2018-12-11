@@ -109,7 +109,7 @@ class SendCoinsActivity : AppCompatActivity() {
                 val giftCoin = Coin(giftId, coin.value, coin.currency)     //coin with modified id
                 //store coin in recipient's collection, set document id as coin id and sender's username
                 firestoreRecipient?.document(giftCoin.id)?.set(giftCoin)
-                User.removeCoinFromCollection(firestore,"wallet",position)  //remove coin from senders wallet
+                User.removeCoinFromCollection(firestore,User.WALLET_COLLECTION_KEY,position)  //remove coin from senders wallet
                 viewAdapter.notifyItemRemoved(position)
 
                 nSent += 1 //increase number of coins sent by one
