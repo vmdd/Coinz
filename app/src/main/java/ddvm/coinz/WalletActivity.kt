@@ -4,6 +4,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import com.google.firebase.firestore.*
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -14,6 +16,8 @@ class WalletActivity : AppCompatActivity() {
 
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var firestore: FirebaseFirestore? = null
+
+    private var checkedAll = false
 
     private val dailyLimit = 25                                 //daily limit of coins to pay in
 
@@ -130,5 +134,35 @@ class WalletActivity : AppCompatActivity() {
 
         //read shared preferences file and exchange rates for coins
         exchangeRates.putAll(Utils.getExchangeRates(this))
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.list_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.check_all -> {
+                if(!checkedAll) {
+                    //items are not all selected
+                    viewAdapter.checkAllItems()         //check them all
+                    viewAdapter.notifyDataSetChanged()
+                    item.setIcon(R.drawable.ic_all_checked)     //change the icon
+                }
+                else {
+                    viewAdapter.clearItemsStates()      //uncheck all
+                    viewAdapter.notifyDataSetChanged()
+                    item.setIcon(R.drawable.ic_select_all)      //change the icon
+                }
+                checkedAll=!checkedAll
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }

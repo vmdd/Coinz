@@ -30,6 +30,11 @@ open class CoinsAdapter(private val context: Context, private val coins:MutableL
         holder.bindCoin(itemCoin)
     }
 
+    fun checkAllItems() {
+        for(i in 0 until coins.size)
+            itemStateArray.put(i, true)
+    }
+
     inner class CoinViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
         private var coin: Coin? = null
 

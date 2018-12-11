@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/check_all"
+        android:icon="@drawable/ic_select_all"
+        app:showAsAction="ifRoom"
+        android:title="@string/action_check_all" />
+    <item
+        android:id="@+id/sort_gold"
+        app:showAsAction="never"
+        android:title="@string/action_sort_gold" />
+</menu>
