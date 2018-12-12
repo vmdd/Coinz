@@ -87,8 +87,8 @@ class RegisterActivity : AppCompatActivity(){
 
     //checks if the data given by the user is valid
     private fun validateForm() {
-        //length of username must be 15 or shorter
-        if(username.length>15) {
+        //length of username must be 12 or shorter
+        if(username.length>12) {
             fieldUserName.error = getString(R.string.long_username)
             return
         }

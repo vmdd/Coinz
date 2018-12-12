@@ -40,7 +40,7 @@ class SettingsActivity : AppCompatActivity() {
             val newUsername = new_username.text.toString()
             when {
                 newUsername.isBlank() -> new_username.error = getString(R.string.prompt_choose_new_name)
-                newUsername.length > 15 -> new_username.error = getString(R.string.long_username)
+                newUsername.length > 12 -> new_username.error = getString(R.string.long_username)
                 else -> checkUserNameAvailable(newUsername)
             }
         }

@@ -20,7 +20,7 @@
     <string name="invalid_email_format">Please enter a valid email</string>
     <string name="email_collision">Account with this email already exists</string>
     <string name="invalid_email_pass">Invalid email or password</string>
-    <string name="long_username">Only 15 characters allowed</string>
+    <string name="long_username">Only 12 characters allowed</string>
     <string name="username_not_available">Username not available. Please choose another username</string>
     <string name="invalid_username_format">Only alphanumeric characters allowed</string>
 
