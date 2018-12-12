@@ -27,7 +27,6 @@ object Binoculars: Item() {
     override fun buy(firestore: FirebaseFirestore?) {
         super.buy(firestore)
         User.setBinoculars(firestore, true)
-        User.increaseVisionRange(additionalVisionRange)
     }
 }
 
@@ -41,7 +40,6 @@ object Bag: Item() {
     override fun buy(firestore: FirebaseFirestore?) {
         super.buy(firestore)
         User.setBag(firestore, true)
-        User.increaseWalletCapacity(15)
     }
 }
 

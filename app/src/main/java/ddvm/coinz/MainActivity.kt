@@ -86,6 +86,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         const val EXTRA_LOCATION = "userLastLocation"
         const val EXTRA_DATE = "curDate"
         const val collectRange = 25  //range to collect coin in meters
+        const val visionRange = 100  //range to see coins
+        const val walletCapacity = 10   //capacity of the wallet
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,7 +149,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //display vision range and check if vision is amplified by the tower
         //if vision amplified set text color to green
         val towerBuff = towerBuff(originLatLng)
-        val range = (User.getVisionRange()*towerBuff).toInt()
+        val range = (getVisionRange()*towerBuff).toInt()
         header_vision_range.text = range.toString() + 'm'
         if(towerBuff > 1)
             header_vision_range.setTextColor(Color.GREEN)
@@ -159,7 +161,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             header_has_glasses.setImageResource(R.drawable.ic_check_black_24dp)
 
         val nCoins = User.getWallet().size  //number of coins in wallet
-        val maxCapacity = User.getWalletCapacity()
+        val maxCapacity = getWalletCapacity()
         header_wallet_capacity.text = "$nCoins/$maxCapacity"        //display how much space the user used already
     }
 
@@ -196,6 +198,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             //sign the user out and go to login screen
             R.id.nav_sign_out -> {
                 FirebaseAuth.getInstance().signOut()    //sign out the user from the current session
+                User.clearData()                        //clears data to prevent another user from using it
                 finish()
                 startActivity(Intent(this,LoginActivity::class.java))   //go to login screen
             }
@@ -438,7 +441,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         val towerMultiplier = towerBuff(location)                 //check if tower buff applies
         for(coin in coins) {
             val markerId = coinsMarkersMap[coin.id]
-            val range = (User.getVisionRange() * towerMultiplier).toInt()
+            val range = (getVisionRange() * towerMultiplier).toInt()
             if(coin.inRange(location, range)) {
                 if(markerId == null)
                     drawMarker(coin)
@@ -456,6 +459,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             location == null -> 1.0
             Tower.userNearPlace(location) -> Tower.visionAmplifier
             else -> 1.0
+        }
+    }
+
+    private fun getVisionRange(): Int {
+        return when (User.hasItem(Binoculars.itemName)) {
+            true -> visionRange + Binoculars.additionalVisionRange
+            false -> visionRange
+        }
+    }
+
+    private fun getWalletCapacity(): Int {
+        return when (User.hasItem(Bag.itemName)) {
+            true -> MainActivity.walletCapacity + Bag.additionalWalletCapacity
+            false -> MainActivity.walletCapacity
         }
     }
 
@@ -528,7 +545,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     private fun checkSpaceInWallet(): Boolean {
-        return User.getWallet().size < User.getWalletCapacity()
+        return User.getWallet().size < getWalletCapacity()
     }
 
     //display network allert prompting user to check the connection and try again or close the app

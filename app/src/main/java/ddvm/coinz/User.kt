@@ -20,8 +20,6 @@ object User {
     private var binoculars = false                                  //if user bought and owns binoculars
     private var bag = false
     private var glasses = false
-    private var walletCapacity = 10                                 //user's wallet capacity (max number of coins in the wallet)
-    private var visionRange = 100                                   //range in which user can see coins on the map
     private var statsChanged = false                                //sets to true right after user buys and item to inform main activity about the change
 
     //firestore collection, documents and field keys
@@ -49,29 +47,41 @@ object User {
             if(document.getString(USERNAME_FIELD_KEY)!=null)
                 username = document.getString(USERNAME_FIELD_KEY)!!
             collectedCoins = document.data?.get(COLLECTED_COINS_FIELD_KEY) as? MutableList<*>
+            Log.d(tag, "[downloadUserData] collected coins: $collectedCoins")
             lastPlayDate = document.getString(LAST_PLAY_FIELD_KEY)
 
-            if(document.getDouble(GOLD_FIELD_KEY)!= null)   //get gold if field not null
-                gold = document.getDouble(GOLD_FIELD_KEY)!!
+            gold =
+                    if(document.getDouble(GOLD_FIELD_KEY)!= null)
+                        document.getDouble(GOLD_FIELD_KEY)!!
+                    else
+                        0.0
 
-            if(document.getDouble(N_PAY_IN_FIELD_KEY)?.toInt()!=null)    //get nPaidInCoins if field not null
-                nPaidInCoins = document.getDouble(N_PAY_IN_FIELD_KEY)?.toInt()!!
+            nPaidInCoins =
+                    if(document.getDouble(N_PAY_IN_FIELD_KEY)?.toInt()!=null)    //get nPaidInCoins if field not null
+                        document.getDouble(N_PAY_IN_FIELD_KEY)?.toInt()!!
+                    else
+                        0
 
-            //if the user has binoculars, increase his vision range
-            if(document.getBoolean(BINOCULARS_FIELD_KEY) == true) {
-                visionRange += Binoculars.additionalVisionRange
-                binoculars = true   //note that user already has binoculars
-            }
+            //check if user has binoculars
+            binoculars =
+                    if(document.getBoolean(BINOCULARS_FIELD_KEY)!=null)
+                        document.getBoolean(BINOCULARS_FIELD_KEY)!!
+                    else
+                        false
 
-            if(document.getBoolean(BAG_FIELD_KEY) == true) {
-                walletCapacity += Bag.additionalWalletCapacity
-                bag = true
-            }
+            //check if user has bag
+            bag =
+                    if(document.getBoolean(BAG_FIELD_KEY)!=null)
+                        document.getBoolean(BAG_FIELD_KEY)!!
+                    else
+                        false
 
-            if(document.getBoolean(GLASSES_FIELD_KEY) == true) {
-                glasses = true
-            }
-
+            //check if user has glasses
+            glasses =
+                    if(document.getBoolean(GLASSES_FIELD_KEY)!=null)
+                        document.getBoolean(GLASSES_FIELD_KEY)!!
+                    else
+                        false
 
             //download user wallet
             downloadUserWallet(firestore, completeListener)
@@ -121,6 +131,8 @@ object User {
 
     fun getUsername() = username
 
+    fun getId() = userId
+
     fun getLastPlayDate() = lastPlayDate
 
     fun getGold() = gold
@@ -132,10 +144,6 @@ object User {
     fun getWallet() = wallet
 
     fun getReceivedCoins() = receivedCoins
-
-    fun getWalletCapacity() = walletCapacity
-
-    fun getVisionRange() = visionRange
 
     fun getStatsChanged() = statsChanged
 
@@ -239,14 +247,6 @@ object User {
         statsChanged = value
     }
 
-    fun increaseVisionRange(range: Int) {
-        visionRange += range
-    }
-
-    fun increaseWalletCapacity(capacity: Int) {
-        walletCapacity += capacity
-    }
-
     fun decreaseGold(firestore: FirebaseFirestore?,goldAmount: Double) {
         gold -= goldAmount
         firestore?.document("$USERS_COLLECTION_KEY/$userId")
@@ -265,5 +265,20 @@ object User {
                 ?.addOnFailureListener {
                     completeListener(false)
                 }
+    }
+
+    //used for log out
+    fun clearData() {
+        username = ""                               //user's username chosen during registration
+        collectedCoins = null              //id of coins collected by the user on last play date
+        gold = 0.0                                  //user's gold amount
+        lastPlayDate = null                        //last date the player played the game
+        nPaidInCoins = 0                               //number of coins paid into the bank on the last play date
+        userId = null                              //user id in firebase auth
+        wallet.clear()                     //list of coins currently in user's wallet
+        receivedCoins.clear()               //coins currently in user's receivedCoins account waiting for pay into the bank
+        binoculars = false                                  //if user bought and owns binoculars
+        bag = false
+        glasses = false
     }
 }
