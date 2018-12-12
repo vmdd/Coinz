@@ -1,13 +1,17 @@
 package ddvm.coinz
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
@@ -360,6 +364,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             mapJson = Utils.getMapFromSharedPrefs(this)
             getCoinsFromJson()
         } else {
+            if(!checkNetworkConnection()){
+                networkAllert()
+                return
+            }
             downloadDate = dateFormatted
             val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
             DownloadFileTask(this).execute(url)     //downloads the map
@@ -526,6 +534,31 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         return User.getWallet().size < User.getWalletCapacity()
     }
 
+    //display network allert prompting user to check the connection and try again or close the app
+    private fun networkAllert() {
+        val alertDialog: AlertDialog? = this.let {
+            val builder = AlertDialog.Builder(it)
+            builder.apply{
+                setPositiveButton(getString(R.string.prompt_try_again)) {_, _ ->
+                    getGeoJsonMap()
+                }
+                setNegativeButton(getString(R.string.close_app)) { _, _ ->
+                    finish()
+                }
+                builder.setMessage(getString(R.string.no_network))
+            }
+            builder.create()
+        }
+        alertDialog?.show()
+    }
+
+    //checks if network connection is available
+    private fun checkNetworkConnection(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return activeNetwork?.isConnected == true
+    }
+
 
     override fun onConnected() {
         Log.d(tag, "[onConnected] requesting location updates")
@@ -552,7 +585,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     //checks if the date changes and refreshes the app to download new map
-    fun checkDayChange() {
+    private fun checkDayChange() {
         if(LocalDate.now() != curDate){
             Log.d(tag,"[checkDayChange] day changed, refreshing app")
             finish()

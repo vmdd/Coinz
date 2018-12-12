@@ -33,6 +33,9 @@
     <string name="wallet_full">No space in the wallet!</string>
     <string name="distance_to_object">Distance to coin: </string>
     <string name="collected_coin">Coin collected!</string>
+    <string name="no_network">Please check your internet connection</string>
+    <string name="prompt_try_again">Try again</string>
+    <string name="close_app">Exit</string>
 
     <!-- wallet strings -->
     <string name="wallet">Wallet</string>

@@ -1,7 +1,11 @@
 package ddvm.coinz
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -59,7 +63,10 @@ class SendCoinsActivity : AppCompatActivity() {
 
         send_coins_button.setOnClickListener {
             when {
-                userLastLocation == null -> Toast.makeText(this, getString(R.string.no_location), Toast.LENGTH_SHORT).show()
+                !checkNetworkConnection() -> Toast.makeText(this,               // no network
+                        getString(R.string.no_network), Toast.LENGTH_SHORT).show()
+                userLastLocation == null -> Toast.makeText(this,                // no location found
+                        getString(R.string.no_location), Toast.LENGTH_SHORT).show()
                 //must be in bank to send coins
                 !Bank.userNearPlace(userLastLocation!!) -> Toast.makeText(this,
                         getString(R.string.not_in_bank_for_send_coins), Toast.LENGTH_SHORT).show()
@@ -121,6 +128,13 @@ class SendCoinsActivity : AppCompatActivity() {
             Toast.makeText(this,"Sent $nSent coin(s) to $recipientUsername", Toast.LENGTH_SHORT).show()
         }
         viewAdapter.clearItemsStates()
+    }
+
+    //check if network connection is available
+    private fun checkNetworkConnection(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return activeNetwork?.isConnected == true
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
