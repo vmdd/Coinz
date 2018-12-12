@@ -1,5 +1,8 @@
 package ddvm.coinz
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -37,6 +40,10 @@ class SettingsActivity : AppCompatActivity() {
 
         //change username switch
         change_username.setOnClickListener {
+            if(!checkNetworkConnection()){
+                Toast.makeText(this, getString(R.string.no_network), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val newUsername = new_username.text.toString()
             when {
                 newUsername.isBlank() -> new_username.error = getString(R.string.prompt_choose_new_name)
@@ -68,5 +75,12 @@ class SettingsActivity : AppCompatActivity() {
                         getString(R.string.username_change_failure), Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    //checks if network connection is available
+    private fun checkNetworkConnection(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return activeNetwork?.isConnected == true
     }
 }

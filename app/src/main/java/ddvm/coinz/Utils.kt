@@ -150,11 +150,13 @@ object Utils {
         }
     }
 
+    //formats gold to fit on the screen
     fun formatGold(gold:Double) : String {
-        val goldi = gold.toInt()
         return when {
-            goldi >=10000 -> goldi.div(1000).toString() + 'k'
-            else -> goldi.toString()
+            gold >= 1000000000 -> String.format("%.1fB", gold.div(1000000000))
+            gold >= 10000000 -> gold.div(1000000).toInt().toString() + 'M'
+            gold >= 10000 -> gold.div(1000).toInt().toString() + 'k'
+            else -> String.format("%.0f", gold)
         }
     }
 
