@@ -14,8 +14,11 @@ import kotlinx.android.synthetic.main.activity_login.*
 //class for logging in
 class LoginActivity : AppCompatActivity(){
 
-    private val tag = "LoginActivity"
     private lateinit var mAuth: FirebaseAuth
+
+    companion object {
+        const val tag = "LoginActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,5 +83,9 @@ class LoginActivity : AppCompatActivity(){
         finish()
     }
 
+    override fun onDestroy() {
+        super.onStop()
+        Log.d(tag, "[onDestroy] login act")
+    }
 
 }

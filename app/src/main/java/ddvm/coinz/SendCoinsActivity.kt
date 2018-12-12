@@ -91,7 +91,8 @@ class SendCoinsActivity : AppCompatActivity() {
     }
 
     private fun sendCoins(recipientUid: String, recipientUsername: String) {
-        val firestoreRecipient = firestore?.collection("users/$recipientUid/received_coins")
+        val firestoreRecipient = firestore
+                ?.collection("${User.USERS_COLLECTION_KEY}/$recipientUid/${User.RECEIVED_COLLECTION_KEY}")
 
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
 

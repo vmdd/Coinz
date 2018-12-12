@@ -6,6 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object Utils {
     //gets exchange rates and stores them in the map
@@ -162,5 +164,14 @@ object Utils {
 
     fun sortCoinsByCurrency(coins: MutableList<Coin>, exchangeRates: MutableMap<String, Double>) {
         coins.sortWith(compareBy<Coin>{it.currency}.thenByDescending {it.toGold(exchangeRates)})
+    }
+
+    //check if day changed (midnight)
+    fun checkDayChanged(curDate: LocalDate): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        val dateFormatted = curDate.format(formatter)   //current date
+        Log.d(tag,"[checkDayChanged] user last play date ${User.getLastPlayDate()}")
+        Log.d(tag,"[checkDayChanged] current date $dateFormatted")
+        return (User.getLastPlayDate()!=dateFormatted)
     }
 }

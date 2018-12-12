@@ -1,5 +1,6 @@
 package ddvm.coinz
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -11,6 +12,7 @@ import com.google.firebase.firestore.*
 import com.mapbox.mapboxsdk.geometry.LatLng
 
 import kotlinx.android.synthetic.main.activity_wallet.*
+import java.time.LocalDate
 
 class WalletActivity : AppCompatActivity() {
 
@@ -58,6 +60,10 @@ class WalletActivity : AppCompatActivity() {
 
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
+            if(Utils.checkDayChanged(LocalDate.now())){
+                refreshApp()
+                return@setOnClickListener
+            }
             when {
                 userLastLocation == null -> Toast.makeText(this,
                         getString(R.string.no_location), Toast.LENGTH_SHORT).show()
@@ -130,6 +136,11 @@ class WalletActivity : AppCompatActivity() {
 
         //check if the transaction is within the daily limit
         return (dailyLimit - User.getNPaidInCoins() - nCoinsToPayIn >= 0)
+    }
+
+    private fun refreshApp() {
+        finishAffinity()
+        startActivity(Intent(this,  MainActivity::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

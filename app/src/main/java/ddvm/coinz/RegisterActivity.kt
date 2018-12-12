@@ -19,13 +19,16 @@ import kotlinx.android.synthetic.main.activity_register.*
 //class for logging in
 class RegisterActivity : AppCompatActivity(){
 
-    private val tag = "RegisterActivity"
     private lateinit var mAuth: FirebaseAuth
     private var firestore: FirebaseFirestore? = null
     private var firestoreUser: DocumentReference? = null        //user document
     private var username = ""                                   //user's username
     private var email = ""                                      //user's email
     private var password = ""                                   //user's password
+
+    companion object {
+        const val tag = "RegisterActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -14,15 +14,17 @@ import kotlin.math.roundToInt
 
 class LeaderboardActivity : AppCompatActivity() {
 
-    private val tag = "LeaderboardActivity"
-
     private var firestore: FirebaseFirestore? = null
     private var firestoreUsers: CollectionReference? = null     //reference to collection with all users documents
 
-    private val leaderboardList = mutableListOf<Pair<String,Double>>()
+    private val leaderboardList = mutableListOf<Pair<String,Double>>()  //list of usernames and user's gold collected
 
     private lateinit var viewAdapter: LeaderboardAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
+
+    companion object {
+        const val tag = "LeaderboardActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

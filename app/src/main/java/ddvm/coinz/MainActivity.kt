@@ -53,8 +53,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         PermissionsListener, DownloadCompleteListener,
         NavigationView.OnNavigationItemSelectedListener{
 
-    private val tag = "MainActivity"
-
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
 
@@ -62,6 +60,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
 
+    private lateinit var curDate: LocalDate
     private var downloadDate = ""   //date of last downloaded map, format yyyy/MM/dd
     //private val preferencesFile = "MyPrefsFile"
     private var mapJson = ""        //downloaded geo-json map
@@ -80,7 +79,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private lateinit var locationLayerPlugin: LocationLayerPlugin
 
     companion object {
+        const val tag = "MainActivity"
         const val EXTRA_LOCATION = "userLastLocation"
+        const val EXTRA_DATE = "curDate"
         const val collectRange = 25  //range to collect coin in meters
     }
 
@@ -151,7 +152,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             header_vision_range.setTextColor(ContextCompat.getColor(this, //default color
                     android.R.color.tab_indicator_text))
 
-        if(User.hasItem("Glasses"))
+        if(User.hasItem(Glasses.itemName))
             header_has_glasses.setImageResource(R.drawable.ic_check_black_24dp)
 
         val nCoins = User.getWallet().size  //number of coins in wallet
@@ -166,7 +167,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_wallet -> {
                 //start activity and pass the current location
                 startActivity(Intent(this, WalletActivity::class.java)
-                        .putExtra(EXTRA_LOCATION, originLatLng))
+                        .putExtra(EXTRA_LOCATION, originLatLng)
+                        .putExtra(EXTRA_DATE, curDate))
             }
             R.id.nav_shop -> {
                 startActivity(Intent(this, ShopActivity::class.java)
@@ -213,7 +215,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             addPlacesMarkers()
 
             map?.setOnMarkerClickListener {marker ->
-                if(marker.title in listOf("Bank", "Tower", "Shop")) {
+                if(marker.title in listOf(Bank.placeName, Tower.placeName, Shop.placeName)) {
                     Toast.makeText(this, marker.title, Toast.LENGTH_SHORT).show()
                 } else if(originLatLng!=null) {
                     val distance = marker.position.distanceTo(originLatLng)       //distance from the user to the coin
@@ -292,6 +294,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     }
 
     override fun onLocationChanged(location: Location?) {
+        checkDayChange()    //check if date changed (midnight)
         if(location == null){
             Log.d(tag, "[onLocationChanged] location is null")
         }else{
@@ -334,7 +337,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         locationEngine?.addLocationEngineListener(this)
 
         //current date
-        val curDate = LocalDate.now()
+        curDate = LocalDate.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
         dateFormatted = curDate.format(formatter)   //current date
 
@@ -455,7 +458,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private fun drawMarker(coin: Coin){
         val iconResource =
                 //check if user has glasses
-                if(User.hasItem("Glasses")) {
+                if(User.hasItem(Glasses.itemName)) {
                     Utils.selectIcon(coin.currency, coin.value.toInt().toString())      //icon with coin value
                 } else {
                     Utils.selectIcon(coin.currency)                                     //icon without coin value
@@ -513,7 +516,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 User.addCollectedCoin(firestore, coin)
                 removeMarker(coin)
                 coinsIterator.remove()
-                Toast.makeText(this, "Coin collected!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.collected_coin), Toast.LENGTH_SHORT).show()
             }
         }
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
@@ -546,6 +549,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
         Log.d(tag, "Permissions: $permissionsToExplain")
         // Present popup message or dialog
+    }
+
+    //checks if the date changes and refreshes the app to download new map
+    fun checkDayChange() {
+        if(LocalDate.now() != curDate){
+            Log.d(tag,"[checkDayChange] day changed, refreshing app")
+            finish()
+            startActivity(Intent(this, MainActivity::class.java))
+        }
     }
 
     override fun onResume() {

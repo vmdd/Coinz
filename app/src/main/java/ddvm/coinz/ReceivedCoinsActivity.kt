@@ -1,6 +1,7 @@
 package ddvm.coinz
 
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -13,6 +14,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlinx.android.synthetic.main.activity_received_coins.*
+import java.time.LocalDate
 
 class ReceivedCoinsActivity : AppCompatActivity() {
 
@@ -57,7 +59,11 @@ class ReceivedCoinsActivity : AppCompatActivity() {
 
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
-                storeCoinsInBank()
+            if(Utils.checkDayChanged(LocalDate.now())){
+                refreshApp()
+                return@setOnClickListener
+            }
+            storeCoinsInBank()
         }
 
     }
@@ -98,6 +104,11 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         //remove the coin from firestore and User received coins
         User.removeCoinFromCollection(firestore,User.RECEIVED_COLLECTION_KEY,position)
         viewAdapter.notifyItemRemoved(position)
+    }
+
+    private fun refreshApp() {
+        finishAffinity()
+        startActivity(Intent(this,  MainActivity::class.java))
     }
 
     override fun onStart() {
