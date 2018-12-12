@@ -32,7 +32,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/send_coins" />
+            android:text="@string/send_coins"
+            style="@style/Widget.AppCompat.Button.Colored"/>
     </LinearLayout>
 
 

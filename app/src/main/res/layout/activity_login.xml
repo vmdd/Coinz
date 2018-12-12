@@ -27,11 +27,12 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/go_to_register"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/Widget.AppCompat.Button.Colored"/>
 
     <EditText
         android:id="@+id/fieldPassword"
-        android:layout_width="wrap_content"
+        android:layout_width="352dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:ems="10"
@@ -44,7 +45,7 @@
 
     <EditText
         android:id="@+id/fieldEmail"
-        android:layout_width="wrap_content"
+        android:layout_width="352dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:ems="10"
@@ -61,11 +62,11 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:text="@string/prompt_new_acc"
-        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
 
     <ImageView
         android:id="@+id/logo"
