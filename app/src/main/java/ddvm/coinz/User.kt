@@ -43,11 +43,15 @@ object User {
         //Cloud firestore
         val firestoreUser = firestore?.collection(USERS_COLLECTION_KEY)?.document(userId!!)  //after login mUser shouldn't be null
 
+        //download the user document from firestore and store the data in the fields
         firestoreUser?.get()?.addOnSuccessListener {document ->
+            //get user's username
             if(document.getString(USERNAME_FIELD_KEY)!=null)
                 username = document.getString(USERNAME_FIELD_KEY)!!
             collectedCoins = document.data?.get(COLLECTED_COINS_FIELD_KEY) as? MutableList<*>
+
             Log.d(tag, "[downloadUserData] collected coins: $collectedCoins")
+
             lastPlayDate = document.getString(LAST_PLAY_FIELD_KEY)
 
             gold =
@@ -119,7 +123,7 @@ object User {
                 ?.addOnSuccessListener {result ->
                     for(document in result) {
                         val coin = document.toObject(Coin::class.java)
-                        receivedCoins.add(coin)
+                        receivedCoins.add(coin)                                     //add received coins to the list
                     }
                     completeListener()  //download successfully completed, call completeListener passed by the caller
                 }
@@ -129,9 +133,9 @@ object User {
 
     }
 
-    fun getUsername() = username
+    //getters used by other classes to access user's data
 
-    fun getId() = userId
+    fun getUsername() = username
 
     fun getLastPlayDate() = lastPlayDate
 
@@ -147,6 +151,7 @@ object User {
 
     fun getStatsChanged() = statsChanged
 
+    //check if the user has specified item
     fun hasItem(itemName: String): Boolean {
         return when(itemName) {
             Binoculars.itemName -> binoculars
@@ -225,28 +230,34 @@ object User {
                 ?.addOnFailureListener { e -> Log.d(tag, "[removeCoinFromCollection] error deleting coin document", e) }
     }
 
+    //set if user has binoculars
     fun setBinoculars(firestore:FirebaseFirestore?, value: Boolean) {
         binoculars = value
         firestore?.document("$USERS_COLLECTION_KEY/$userId")
                 ?.update(BINOCULARS_FIELD_KEY, binoculars)
     }
 
+    //set if user has bag
     fun setBag(firestore: FirebaseFirestore?, value: Boolean) {
         bag = value
         firestore?.document("$USERS_COLLECTION_KEY/$userId")
                 ?.update(BAG_FIELD_KEY, bag)
     }
 
+    //set if user has glasses
     fun setGlasses(firestore: FirebaseFirestore?, value: Boolean) {
         glasses = value
         firestore?.document("$USERS_COLLECTION_KEY/$userId")
                 ?.update(GLASSES_FIELD_KEY, glasses)
     }
 
+    //set stats changed. Used when user bought an item to notify the MainActivity of the change
+    //also used by Main Activity to set back to false
     fun setStatsChanged(value:Boolean) {
         statsChanged = value
     }
 
+    //decreases the user's amount of gold
     fun decreaseGold(firestore: FirebaseFirestore?,goldAmount: Double) {
         gold -= goldAmount
         firestore?.document("$USERS_COLLECTION_KEY/$userId")
@@ -268,6 +279,7 @@ object User {
     }
 
     //used for log out
+    //clears the data, so the next user who logs in won't inherit stuff
     fun clearData() {
         username = ""                               //user's username chosen during registration
         collectedCoins = null              //id of coins collected by the user on last play date

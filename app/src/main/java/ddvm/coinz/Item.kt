@@ -5,15 +5,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 //items modifying user's statistics
 abstract class Item {
     abstract val itemName: String
-    abstract val itemDescription: String
-    abstract val price: Double
-    abstract val iconResource: Int
-    open var additionalVisionRange: Int = 0
-    open var additionalWalletCapacity: Int = 0
+    abstract val itemDescription: String                    //description what the item does
+    abstract val price: Double                              //gold amount needed to buy an item
+    abstract val iconResource: Int                          //R.drawable resource of the item's icon
+    open var additionalVisionRange: Int = 0                 //how much vision range is increased by item, 0 by default
+    open var additionalWalletCapacity: Int = 0              //additional wallet capacity, default 0
 
     open fun buy(firestore: FirebaseFirestore?) {
-        User.decreaseGold(firestore, this.price)
-        User.setStatsChanged(true)
+        User.decreaseGold(firestore, this.price)            //reduce amount of user's gold
+        User.setStatsChanged(true)                          //set this to notify the MainActivity of the change
     }
 }
 
@@ -26,7 +26,7 @@ object Binoculars: Item() {
     override var additionalVisionRange = 50
     override fun buy(firestore: FirebaseFirestore?) {
         super.buy(firestore)
-        User.setBinoculars(firestore, true)
+        User.setBinoculars(firestore, true)         //set to note the user bought binoculars
     }
 }
 
@@ -39,7 +39,7 @@ object Bag: Item() {
     override var additionalWalletCapacity = 15
     override fun buy(firestore: FirebaseFirestore?) {
         super.buy(firestore)
-        User.setBag(firestore, true)
+        User.setBag(firestore, true)                //note the user bought bag
     }
 }
 
@@ -51,7 +51,7 @@ object Glasses: Item() {
     override val iconResource = R.drawable.ic_glasses
     override fun buy(firestore: FirebaseFirestore?) {
         super.buy(firestore)
-        User.setGlasses(firestore, true)
+        User.setGlasses(firestore, true)            //note the user bought glasses
     }
 
 }

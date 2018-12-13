@@ -53,6 +53,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    //checks if given username is available
     private fun checkUserNameAvailable(username: String) {
         Utils.checkUserExists(firestore, username) { exists, _ ->
             if(exists) {
@@ -64,7 +65,9 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    //changes user's username
     private fun changeUsername(username: String) {
+        //call User function to change the username and pass a listener to listen when the action completes
         User.changeUserName(firestore, username) { success ->
             if(success) {
                 Toast.makeText(this,

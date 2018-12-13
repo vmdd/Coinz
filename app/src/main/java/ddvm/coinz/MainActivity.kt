@@ -7,6 +7,7 @@ import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.os.Bundle
+import android.support.annotation.VisibleForTesting
 import android.support.design.widget.NavigationView
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
@@ -18,7 +19,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.gson.JsonObject
 import com.mapbox.android.core.location.LocationEngine
@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var map: MapboxMap? = null
 
     private var mAuth: FirebaseAuth? = null
-    private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
 
     private lateinit var curDate: LocalDate
@@ -75,16 +74,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private var autocollection = false
     private val places = listOf(Bank, Shop, Tower)        //list of special places on the map
 
-    private var originLocation: Location? = null
-    private var originLatLng: LatLng? = null
+    private var originLocation: Location? = null                    //user's location
+    private var originLatLng: LatLng? = null                        //user's lattitude and longitude
     private lateinit var permissionsManager: PermissionsManager
     private var locationEngine: LocationEngine? = null
     private lateinit var locationLayerPlugin: LocationLayerPlugin
 
     companion object {
         const val tag = "MainActivity"
-        const val EXTRA_LOCATION = "userLastLocation"
-        const val EXTRA_DATE = "curDate"
+        const val EXTRA_LOCATION = "userLastLocation"           //to pass extra in intent
+        const val EXTRA_DATE = "curDate"                        //to pass extra in intent
         const val collectRange = 25  //range to collect coin in meters
         const val visionRange = 100  //range to see coins
         const val walletCapacity = 10   //capacity of the wallet
@@ -101,7 +100,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         //Firebase authentication
         mAuth = FirebaseAuth.getInstance()
-        mUser = mAuth?.currentUser
 
         //Cloud firestore
         firestore = FirebaseFirestore.getInstance()
@@ -119,6 +117,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //Navigation drawer
         nav_view.setNavigationItemSelectedListener(this)
 
+        //update the drawer data whenever the user opens it
         drawer_layout.addDrawerListener(
                 object : DrawerLayout.DrawerListener {
                     override fun onDrawerOpened(drawerView: View) {}
@@ -130,6 +129,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 }
         )
 
+        //recenter button to center the camera on user's location
         recenter_fab.setOnClickListener {
             if(originLatLng!=null)
                 setCameraPosition(originLatLng!!) }
@@ -148,15 +148,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
 
         //display vision range and check if vision is amplified by the tower
         //if vision amplified set text color to green
-        val towerBuff = towerBuff(originLatLng)
+        val towerBuff = towerBuff(originLatLng)                 //check Tower buff multiplier (1 if not near tower, 1.2 if near tower
         val range = (getVisionRange()*towerBuff).toInt()
-        header_vision_range.text = range.toString() + 'm'
+
+        header_vision_range.text = range.toString() + 'm'               //range and m which stands for meters
+
         if(towerBuff > 1)
-            header_vision_range.setTextColor(Color.GREEN)
+            header_vision_range.setTextColor(Color.GREEN)               //set the color of text to green if tower buff applied
         else
             header_vision_range.setTextColor(ContextCompat.getColor(this, //default color
                     android.R.color.tab_indicator_text))
 
+        //check if user has glasses and note it in the navigation drawer
         if(User.hasItem(Glasses.itemName))
             header_has_glasses.setImageResource(R.drawable.ic_check_black_24dp)
 
@@ -220,6 +223,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             //add markers of important places
             addPlacesMarkers()
 
+            //add marker listeners to display the distance to the coin or collect the coin if in range
+            //display the place name if clicked marker is a place
             map?.setOnMarkerClickListener {marker ->
                 if(marker.title in listOf(Bank.placeName, Tower.placeName, Shop.placeName)) {
                     Toast.makeText(this, marker.title, Toast.LENGTH_SHORT).show()
@@ -355,7 +360,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private fun userDataDownloaded() {
         updateUserData()
         getCoinsFromJson()
-        //updateDrawerHeader()
     }
 
     //check the date of the last downloaded map stored in shared preferences
@@ -363,14 +367,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     private fun getGeoJsonMap() {
         downloadDate = Utils.getLastDownloadDateFromSharedPrefs(this)
         if(dateFormatted == downloadDate) {
+            //map in shared prefs still up to date, get it
             mapJson = Utils.getMapFromSharedPrefs(this)
             getCoinsFromJson()
         } else {
+            //check if connection is available
             if(!checkNetworkConnection()){
                 networkAllert()
                 return
             }
-            downloadDate = dateFormatted
+            downloadDate = dateFormatted                                        //set the current date
             val url = "http://homepages.inf.ed.ac.uk/stg/coinz/$dateFormatted/coinzmap.geojson"
             DownloadFileTask(this).execute(url)     //downloads the map
         }
@@ -389,7 +395,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //runs after geo-JSON map is downloaded
     override fun downloadComplete(result: String) {
         mapJson = result    //for storage in shared preferences
-        Utils.saveMapToSharedPrefs(this, downloadDate, mapJson)
+        Utils.saveMapToSharedPrefs(this, downloadDate, mapJson)         //saves map to shared prefs
         Log.d(tag, "[downloadComplete] downloaded new map, date: $downloadDate")
         getCoinsFromJson()
     }
@@ -425,7 +431,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             }
         }
 
-        displayInitialCoins()
+        displayInitialCoins()           //displays coins that are near the user
     }
 
     //this funcion is run once after all asynctasks are done,
@@ -437,6 +443,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         Log.d(tag, "[displayInitialCoins] map $map, location: $originLocation, coins: ${coins.size}")
     }
 
+    //display coins which are in user's vision range. Called on every location change
     private fun displayCoinsInVisionRange(location: LatLng) {
         val towerMultiplier = towerBuff(location)                 //check if tower buff applies
         for(coin in coins) {
@@ -462,6 +469,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //get user's vision range, check if modified by binoculars
     private fun getVisionRange(): Int {
         return when (User.hasItem(Binoculars.itemName)) {
             true -> visionRange + Binoculars.additionalVisionRange
@@ -469,6 +477,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //get wallet capacity check if modified by bag
     private fun getWalletCapacity(): Int {
         return when (User.hasItem(Bag.itemName)) {
             true -> MainActivity.walletCapacity + Bag.additionalWalletCapacity
@@ -494,7 +503,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         if(marker == null) {
             Log.d(tag, "[drawMarkers] marker is null")
         } else {
-            coinsMarkersMap[coin.id] = marker.id
+            coinsMarkersMap[coin.id] = marker.id            //store coin id and matching marker id
         }
         Log.d(tag, "[drawMarkers] number of markers on the map ${map?.markers?.size}")
     }
@@ -505,6 +514,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         if(markerId == null || map == null) {
             Log.d(tag, "[removeMarker]: map or marker id is null")
         } else {
+            //iterate through markers and find the one to remove
             for (marker in map!!.markers) {
                 if(markerId == marker.id) {
                     marker.remove()
@@ -512,7 +522,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 }
             }
         }
-        coinsMarkersMap.remove(coin.id)
+        coinsMarkersMap.remove(coin.id)             //remove the entry from the map
     }
 
     //collect the coin given it's id
@@ -544,6 +554,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
     }
 
+    //check if user still has space in the wallet
     private fun checkSpaceInWallet(): Boolean {
         return User.getWallet().size < getWalletCapacity()
     }
@@ -554,10 +565,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             val builder = AlertDialog.Builder(it)
             builder.apply{
                 setPositiveButton(getString(R.string.prompt_try_again)) {_, _ ->
+                    //retry downloading gson map
                     getGeoJsonMap()
                 }
                 setNegativeButton(getString(R.string.close_app)) { _, _ ->
-                    finish()
+                    finish()            //close the app
                 }
                 builder.setMessage(getString(R.string.no_network))
             }
@@ -664,6 +676,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            //open the drawer
             android.R.id.home -> {
                 drawer_layout.openDrawer(GravityCompat.START)
                 true
@@ -672,4 +685,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         }
     }
 
+    //returns number of coins on the map
+    @VisibleForTesting
+    fun checkCoinsNumber(): Int {
+        return  coins.size
+    }
 }

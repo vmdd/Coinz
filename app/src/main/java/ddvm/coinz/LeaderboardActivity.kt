@@ -53,6 +53,7 @@ class LeaderboardActivity : AppCompatActivity() {
         getLeaderboard()
     }
 
+    //query firestore for 10 documents with highest gold
     private fun getLeaderboard() {
         leaderboardList.clear()
         firestoreUsers?.orderBy("gold", Query.Direction.DESCENDING)?.limit(10)

@@ -31,8 +31,8 @@ class LeaderboardAdapter(private val context: Context,
         fun bind(userEntry: Pair<String,Double>) {
             this.userEntry = userEntry
 
-            view.username.text = userEntry.first
-            view.user_gold.text = Utils.formatGold(userEntry.second)
+            view.username.text = userEntry.first                            //first entry of the pair is user's username
+            view.user_gold.text = Utils.formatGold(userEntry.second)        //user's gold
 
             //set the position, with special icons for first 3 positions
             when (adapterPosition) {

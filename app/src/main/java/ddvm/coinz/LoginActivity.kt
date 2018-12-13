@@ -36,14 +36,15 @@ class LoginActivity : AppCompatActivity(){
 
         setContentView(R.layout.activity_login)
 
+        //sign in buttion
         email_sign_in_button.setOnClickListener {
             //check if there is network connection
             if(!checkNetworkConnection()){
                 Toast.makeText(this, getString(R.string.no_network), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val email = fieldEmail.text.toString()
-            val password = fieldPassword.text.toString()
+            val email = fieldEmail.text.toString()              //email entered by the user
+            val password = fieldPassword.text.toString()        //password entered by the user
             signIn(email, password)
         }
         go_to_register.setOnClickListener {
@@ -52,10 +53,13 @@ class LoginActivity : AppCompatActivity(){
         Log.d(tag, "[onCreate] called")
     }
 
+    //calls firebase sign in function if the data passes by the user is valid
     private fun signIn(email: String, password: String) {
+        //validate the form and return if data not valid
         if(!validateForm(email, password))
             return
 
+        //necessary checks passed, try to sign the user in
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this){ task ->
             if(task.isSuccessful){
@@ -72,6 +76,7 @@ class LoginActivity : AppCompatActivity(){
         }
     }
 
+    //validates the form, just checks if anything is entered in the fields
     private fun validateForm(email: String, password: String): Boolean{
         if(email.isBlank()){
             fieldEmail.error = getString(R.string.required)

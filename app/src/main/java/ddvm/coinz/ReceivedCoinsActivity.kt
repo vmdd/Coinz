@@ -25,10 +25,10 @@ class ReceivedCoinsActivity : AppCompatActivity() {
     private var mUser: FirebaseUser? = null
     private var firestore: FirebaseFirestore? = null
 
-    private var checkedAll = false
+    private var checkedAll = false                              //if select all button in the actionbar is checked or not
 
 
-    private lateinit var viewAdapter: CoinsAdapter
+    private lateinit var viewAdapter: CoinsAdapter                  //recyclerview adapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +46,8 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         firestore?.firestoreSettings = settings
 
         viewManager = LinearLayoutManager(this)
+
+        //pass context, list to display and exchange rates to calculate coins value in gold
         viewAdapter = ReceivedCoinsAdapter(this, User.getReceivedCoins(), exchangeRates)
 
         coins_received_recycler_view.apply {
@@ -68,6 +70,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
 
     }
 
+    //throw away selected coins
     private fun discardSelectedCoins() {
         val itemsStates = viewAdapter.getItemsStates()  //get which items are selected
 
@@ -106,6 +109,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         viewAdapter.notifyItemRemoved(position)
     }
 
+    //refreshes the app by closing all activities and opening MainActivity again, called on midnight
     private fun refreshApp() {
         finishAffinity()
         startActivity(Intent(this,  MainActivity::class.java))
@@ -113,6 +117,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        //download the received coins collection from firestore
         User.downloadReceivedCoins(firestore) {viewAdapter.notifyDataSetChanged()}
         //read shared preferences file and exchange rates for coins
         exchangeRates.putAll(Utils.getExchangeRates(this))
@@ -129,6 +134,7 @@ class ReceivedCoinsActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            //select all items in the list
             R.id.check_all -> {
                 if(!checkedAll) {
                     //items are not all selected

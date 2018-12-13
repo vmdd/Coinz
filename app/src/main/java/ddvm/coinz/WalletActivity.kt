@@ -19,11 +19,11 @@ class WalletActivity : AppCompatActivity() {
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
     private var firestore: FirebaseFirestore? = null
 
-    private var checkedAll = false
+    private var checkedAll = false                         //if the checkAll button is currently checked or not
 
     private var userLastLocation: LatLng? = null           //last location passed from MainActivity
 
-    private lateinit var viewAdapter: CoinsAdapter
+    private lateinit var viewAdapter: CoinsAdapter                  //recycler view adapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     companion object {
@@ -47,6 +47,9 @@ class WalletActivity : AppCompatActivity() {
         exchangeRates.putAll(Utils.getExchangeRates(this))
 
         viewManager = LinearLayoutManager(this)
+
+        //pass the context, coins list to display and exchange rates to the adapter.
+        //Exchange rates are used to calculate coin's value in gold
         viewAdapter = CoinsAdapter(this, User.getWallet(), exchangeRates)
 
         coins_recycler_view.apply {
@@ -58,6 +61,7 @@ class WalletActivity : AppCompatActivity() {
             adapter = viewAdapter
         }
 
+        //button to throw away coins from the wallet
         discard_coin_button.setOnClickListener { discardSelectedCoins() }
         pay_in_button.setOnClickListener {
             if(Utils.checkDayChanged(LocalDate.now())){
@@ -138,6 +142,7 @@ class WalletActivity : AppCompatActivity() {
         return (dailyLimit - User.getNPaidInCoins() - nCoinsToPayIn >= 0)
     }
 
+    //closes activities and opens the MainActivity. Used to refresh the app on midnight
     private fun refreshApp() {
         finishAffinity()
         startActivity(Intent(this,  MainActivity::class.java))
@@ -169,11 +174,13 @@ class WalletActivity : AppCompatActivity() {
                 checkedAll=!checkedAll
                 true
             }
+            //sort coins by gold values
             R.id.sort_gold -> {
                 Utils.sortCoinsByGold(User.getWallet(), exchangeRates)
                 viewAdapter.notifyDataSetChanged()
                 true
             }
+            //sort coins by currency
             R.id.sort_currency -> {
                 Utils.sortCoinsByCurrency(User.getWallet(), exchangeRates)
                 viewAdapter.notifyDataSetChanged()

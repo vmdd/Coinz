@@ -12,13 +12,13 @@ import kotlinx.android.synthetic.main.activity_shop.*
 
 class ShopActivity : AppCompatActivity() {
 
-    private var items = listOf(Binoculars, Bag, Glasses)
+    private var items = listOf(Binoculars, Bag, Glasses)            //list of items available in the shop
 
     private var firestore: FirebaseFirestore? = null
 
-    private var userLastLocation: LatLng? = null
+    private var userLastLocation: LatLng? = null                    //last location of the user passed from the main activity
 
-    private lateinit var viewAdapter: ItemsAdapter
+    private lateinit var viewAdapter: ItemsAdapter                  //recyclerview adapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,9 +36,11 @@ class ShopActivity : AppCompatActivity() {
         firestore?.firestoreSettings = settings
 
         viewManager = LinearLayoutManager(this)
+        //pass context, and item list for the adapter to display as well as click listener
         viewAdapter = ItemsAdapter(this, items) { item, position ->
             //click listener for listening to "buy" button
             when {
+                //location not available
                 userLastLocation == null -> Toast.makeText(this,
                         getString(R.string.no_location), Toast.LENGTH_SHORT).show()
                 //not in the shop
@@ -68,6 +70,7 @@ class ShopActivity : AppCompatActivity() {
         }
     }
 
+    //check if the user has enough gold to buy the item
     private fun checkEnoughGold(item:Item): Boolean {
         return item.price <= User.getGold()
     }

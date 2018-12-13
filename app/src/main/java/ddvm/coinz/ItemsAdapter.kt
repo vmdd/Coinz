@@ -32,6 +32,7 @@ class ItemsAdapter(private val context: Context, private val items: List<Item>,
         fun bind(item: Item) {
             view.item_name.text = item.itemName
             view.item_description.text = item.itemDescription
+            //set the icon of the item from the resource
             view.item_icon.setImageDrawable(ContextCompat.getDrawable(context, item.iconResource))
             //check if user already has given item
             if(User.hasItem(item.itemName)) {

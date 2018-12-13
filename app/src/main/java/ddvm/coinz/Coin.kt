@@ -14,6 +14,7 @@ data class Coin(val id:String = "",
         return (coordinates.distanceTo(latLng) <= range)
     }
 
+    //given the exchange rates calculates the value of coin in gold
     fun toGold(exchangeRates: MutableMap<String,Double>): Double {
         return if(exchangeRates[currency]!=null) {
             value * exchangeRates[currency]!!

@@ -56,6 +56,8 @@ object Utils {
         return mapJson
     }
 
+    //save the autocollection state set up in Settings
+    //this is stored only in shared preferences
     fun saveAutocollectionState(context: Context, autocollection: Boolean) {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         val editor = settings.edit()
@@ -63,11 +65,13 @@ object Utils {
         editor.apply()
     }
 
+    //check from shared prefs if autocollection is on
     fun getAutocollectionState(context: Context): Boolean {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
         return settings.getBoolean("autocollection",false)
     }
 
+    //check if user with given username exists
     fun checkUserExists(firestore: FirebaseFirestore?, username: String, checkComplete: (Boolean, QuerySnapshot?) -> Unit) {
         firestore?.collection(User.USERS_COLLECTION_KEY)
                 ?.whereEqualTo("lowercase_username", username.toLowerCase())        //querying for documents with same username
@@ -160,10 +164,12 @@ object Utils {
         }
     }
 
+    //sorts the given list of coins by gold value
     fun sortCoinsByGold(coins: MutableList<Coin>, exchangeRates: MutableMap<String, Double>) {
         coins.sortWith(compareByDescending { it.toGold(exchangeRates) })
     }
 
+    //sorts given list of coins by currency
     fun sortCoinsByCurrency(coins: MutableList<Coin>, exchangeRates: MutableMap<String, Double>) {
         coins.sortWith(compareBy<Coin>{it.currency}.thenByDescending {it.toGold(exchangeRates)})
     }

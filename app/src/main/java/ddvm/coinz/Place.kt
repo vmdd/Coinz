@@ -4,10 +4,11 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 
 //class for special places on the map
 abstract class Place {
-    abstract val placeName: String
-    abstract val coordinates: LatLng
-    abstract val placeMarkerResource: Int
+    abstract val placeName: String                      //name of the place
+    abstract val coordinates: LatLng                    //coordinates of the place on the map
+    abstract val placeMarkerResource: Int               //R.drawable resource of the icon of the place
 
+    //checks if the user is near the place
     fun userNearPlace(location: LatLng): Boolean {
         return (location.distanceTo(coordinates) <= MainActivity.collectRange)
     }

@@ -57,6 +57,7 @@ class RegisterActivity : AppCompatActivity(){
             username = fieldUserName.text.toString()
             validateForm()
         }
+        //go back to sign in screen
         go_to_sign_in.setOnClickListener {
             finish()
         }
@@ -80,11 +81,11 @@ class RegisterActivity : AppCompatActivity(){
                         } catch(e: FirebaseAuthWeakPasswordException) {
                             fieldPassword.error = getString(R.string.weak_password_error)       //password too short
                         } catch(e: FirebaseAuthInvalidCredentialsException) {
-                            fieldEmail.error = getString(R.string.invalid_email_format)         //not valid email format
+                            fieldEmail.error = getString(R.string.invalid_email_format)                             //not valid email format
                         } catch(e: FirebaseAuthUserCollisionException) {
-                            fieldEmail.error = getString(R.string.email_collision)              //account already exists
+                            fieldEmail.error = getString(R.string.email_collision)                 //account already exists
                         } catch(e: Exception) {
-                            Toast.makeText(baseContext, e.message, Toast.LENGTH_SHORT).show()   //other
+                            Toast.makeText(baseContext, e.message, Toast.LENGTH_SHORT).show()           //other
                         }
                         Log.d(tag,"[register]create user failed ", task.exception)
                     }
@@ -142,9 +143,10 @@ class RegisterActivity : AppCompatActivity(){
     }
 
     //creates an user document using user's id and stores username and lowercase username for comparison purposes
+    //also initialises fields for later gameplay
     private fun createUserDocument(mUser: FirebaseUser) {
         firestoreUser = firestore?.collection(User.USERS_COLLECTION_KEY)?.document(mUser.uid)     //document id is user's id
-        //add username
+        //store username and add necessary fields for gameplay
         firestoreUser?.set(mapOf(User.USERNAME_FIELD_KEY to username,
                 User.LOWERCASE_USERNAME_FIELD_KEY to username.toLowerCase(),
                 User.N_PAY_IN_FIELD_KEY to 0,

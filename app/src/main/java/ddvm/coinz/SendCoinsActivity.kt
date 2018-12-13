@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -27,9 +26,9 @@ class SendCoinsActivity : AppCompatActivity() {
     private var userLastLocation: LatLng? = null
 
     private val exchangeRates = mutableMapOf<String,Double>()   //map storing exchange rates for coins
-    private var checkedAll = false
+    private var checkedAll = false                              //if the select all button is checked or not
 
-    private lateinit var viewAdapter: CoinsAdapter
+    private lateinit var viewAdapter: CoinsAdapter                  //recycler view adapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +60,7 @@ class SendCoinsActivity : AppCompatActivity() {
             adapter = viewAdapter
         }
 
+        //button to send coins to another player. Conditions checked if the action is possible
         send_coins_button.setOnClickListener {
             when {
                 !checkNetworkConnection() -> Toast.makeText(this,               // no network
@@ -78,6 +78,7 @@ class SendCoinsActivity : AppCompatActivity() {
         }
     }
 
+    //check if the user tries to send coins to themselves and check if the user exists
     private fun checkRecipientValid() {
         val recipientUsername = field_recipient.text.toString().toLowerCase()
         //check if the user tries to send coins to themselves
@@ -97,6 +98,7 @@ class SendCoinsActivity : AppCompatActivity() {
         }
     }
 
+    //stores selected coins in the recipients firestore received coins collection and removes coins from user's wallet
     private fun sendCoins(recipientUid: String, recipientUsername: String) {
         val firestoreRecipient = firestore
                 ?.collection("${User.USERS_COLLECTION_KEY}/$recipientUid/${User.RECEIVED_COLLECTION_KEY}")
@@ -121,6 +123,7 @@ class SendCoinsActivity : AppCompatActivity() {
                 nSent += 1 //increase number of coins sent by one
             }
         }
+        //no coins selected to send
         if(nSent==0) {
             Toast.makeText(this, getString(R.string.no_coins_to_send),
                     Toast.LENGTH_SHORT).show()
@@ -148,6 +151,7 @@ class SendCoinsActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            //select all coins
             R.id.check_all -> {
                 if(!checkedAll) {
                     //items are not all selected
@@ -163,11 +167,13 @@ class SendCoinsActivity : AppCompatActivity() {
                 checkedAll=!checkedAll
                 true
             }
+            //sort coins by gold value
             R.id.sort_gold -> {
                 Utils.sortCoinsByGold(User.getWallet(), exchangeRates)
                 viewAdapter.notifyDataSetChanged()
                 true
             }
+            //sort coins by currency
             R.id.sort_currency -> {
                 Utils.sortCoinsByCurrency(User.getWallet(), exchangeRates)
                 viewAdapter.notifyDataSetChanged()
