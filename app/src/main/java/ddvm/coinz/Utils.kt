@@ -1,6 +1,7 @@
 package ddvm.coinz
 
 import android.content.Context
+import android.support.annotation.VisibleForTesting
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
@@ -11,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 object Utils {
     //gets exchange rates and stores them in the map
-    private val tag = "Utils"
+    private const val tag = "Utils"
     private const val preferencesFile = "MyPrefsFile"
 
     //gets exchange rates from geojson stored in shared preferences
@@ -32,6 +33,7 @@ object Utils {
     }
 
     //saves geojson to the shared prefs
+    @VisibleForTesting
     fun saveMapToSharedPrefs(context: Context, downloadDate: String, mapJson: String) {
         Log.d(tag, "[saveMapToSharedPrefs] Storing lastDownloadDate of $downloadDate")
         //saving download date and mapJson in shared preferences
@@ -45,15 +47,13 @@ object Utils {
     //gets last download date of the map stored in shared prefs
     fun getLastDownloadDateFromSharedPrefs (context: Context): String {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
-        val downloadDate = settings.getString("lastDownloadDate", "")  //last download date
-        return downloadDate
+        return settings.getString("lastDownloadDate", "")  //last download date
     }
 
     //gets the map in shared prefs
     fun getMapFromSharedPrefs (context: Context): String {
         val settings = context.getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
-        val mapJson = settings.getString("mapJson","")
-        return mapJson
+        return settings.getString("mapJson","")
     }
 
     //save the autocollection state set up in Settings

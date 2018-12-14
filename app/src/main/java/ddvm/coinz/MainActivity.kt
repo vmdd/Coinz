@@ -83,7 +83,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     companion object {
         const val tag = "MainActivity"
         const val EXTRA_LOCATION = "userLastLocation"           //to pass extra in intent
-        const val EXTRA_DATE = "curDate"                        //to pass extra in intent
         const val collectRange = 25  //range to collect coin in meters
         const val visionRange = 100  //range to see coins
         const val walletCapacity = 10   //capacity of the wallet
@@ -175,8 +174,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
             R.id.nav_wallet -> {
                 //start activity and pass the current location
                 startActivity(Intent(this, WalletActivity::class.java)
-                        .putExtra(EXTRA_LOCATION, originLatLng)
-                        .putExtra(EXTRA_DATE, curDate))
+                        .putExtra(EXTRA_LOCATION, originLatLng))
             }
             R.id.nav_shop -> {
                 startActivity(Intent(this, ShopActivity::class.java)
@@ -304,6 +302,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
         lifecycle.addObserver(locationLayerPlugin)
     }
 
+    @VisibleForTesting
     override fun onLocationChanged(location: Location?) {
         checkDayChange()    //check if date changed (midnight)
         if(location == null){
@@ -549,6 +548,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
                 removeMarker(coin)
                 coinsIterator.remove()
                 Toast.makeText(this, getString(R.string.collected_coin), Toast.LENGTH_SHORT).show()
+                Log.d(tag, "[collectCOinsInRange] coins in collected list ${User.getCollectedCoins()}")
             }
         }
         //Log.d(tag, "[checkCoinsInRange]: ${coins.size}")
@@ -688,6 +688,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationEngineList
     //returns number of coins on the map
     @VisibleForTesting
     fun checkCoinsNumber(): Int {
-        return  coins.size
+        return  coins.size + User.getCollectedCoins()!!.size
     }
+    @VisibleForTesting
+    fun autocollectionOn() {
+        autocollection = true
+    }
+
+    @VisibleForTesting
+    fun setUserLatLng(location: LatLng) {
+        originLatLng = location
+    }
+
 }

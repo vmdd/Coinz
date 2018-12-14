@@ -293,4 +293,12 @@ object User {
         bag = false
         glasses = false
     }
+
+    fun resetLocalData() {
+        collectedCoins?.clear()
+        gold = 0.0
+        nPaidInCoins = 0
+        wallet.clear()
+        receivedCoins.clear()
+    }
 }
