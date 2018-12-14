@@ -35,6 +35,7 @@ public class MapDownloadTest {
     @Rule
     public GrantPermissionRule locationPermissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION);
 
+    //download the map and check if the number of coins in the list is 50
     @Test
     public void mapDownloadTest() {
         // Added a sleep statement to match the app's execution delay.

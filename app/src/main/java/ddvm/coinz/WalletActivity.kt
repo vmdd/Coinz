@@ -3,7 +3,6 @@ package ddvm.coinz
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.annotation.VisibleForTesting
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
@@ -74,7 +73,7 @@ class WalletActivity : AppCompatActivity() {
                         getString(R.string.no_location), Toast.LENGTH_SHORT).show()
                 !Bank.userNearPlace(userLastLocation!!) -> Toast.makeText(this, getString(R.string.not_in_bank),
                         Toast.LENGTH_SHORT).show()
-                !checkPayInLimit() -> Toast.makeText(this, getString(R.string.limit_exhausted),
+                !checkPayInLimit() -> Toast.makeText(this, "You can only pay in ${dailyLimit -User.getNPaidInCoins()} coin(s) more!",
                         Toast.LENGTH_SHORT).show()
                 else -> storeCoinsInBank()
             }

@@ -53,6 +53,14 @@ object TestUtils {
                 }
                 deleteCoinsFromWallet(coinsToRemove)
             }
+
+            val receivedCoinsToRemove = mutableListOf<String>()
+            firestoreUser.collection(User.RECEIVED_COLLECTION_KEY).get().addOnSuccessListener { result ->
+                for(document in result) {
+                    receivedCoinsToRemove.add(document.id)
+                }
+                deleteCoinsFromReceived(receivedCoinsToRemove)
+            }
         }
 
         try {
@@ -70,6 +78,17 @@ object TestUtils {
                 .collection(User.WALLET_COLLECTION_KEY)
         for(id in coinIds) {
             firestoreWallet.document(id).delete()
+        }
+    }
+
+    //delete all coins in received coins wallet
+    private fun deleteCoinsFromReceived(coinIds: MutableList<String>) {
+        val firestoreReceived = FirebaseFirestore.getInstance()
+                .collection(User.USERS_COLLECTION_KEY)
+                .document(FirebaseAuth.getInstance().uid!!)
+                .collection(User.RECEIVED_COLLECTION_KEY)
+        for(id in coinIds) {
+            firestoreReceived.document(id).delete()
         }
     }
 }

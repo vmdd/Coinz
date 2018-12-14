@@ -1,6 +1,5 @@
 package ddvm.coinz
 
-import android.util.Log
 import com.mapbox.mapboxsdk.geometry.LatLng
 
 // data class for coins

@@ -10,7 +10,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.Query
 import kotlinx.android.synthetic.main.activity_leaderboard.*
-import kotlin.math.roundToInt
 
 class LeaderboardActivity : AppCompatActivity() {
 
